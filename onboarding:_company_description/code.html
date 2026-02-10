@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Onboarding: Company Description</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#195de6",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#111621",
+                        "neutral-border": "#e1e4ea",
+                        "neutral-text-muted": "#64748b"
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            -webkit-tap-highlight-color: transparent;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-display bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 flex justify-center items-center min-h-screen">
+<!-- iOS Phone Container -->
+<div class="w-full max-w-[390px] h-[844px] bg-white dark:bg-slate-900 shadow-2xl overflow-hidden relative flex flex-col">
+<!-- Status Bar Space -->
+<div class="h-12 w-full flex justify-between items-center px-8 pt-4">
+<span class="text-xs font-semibold">9:41</span>
+<div class="flex gap-1.5 items-center">
+<span class="material-icons text-sm">signal_cellular_alt</span>
+<span class="material-icons text-sm">wifi</span>
+<span class="material-icons text-sm rotate-90">battery_full</span>
+</div>
+</div>
+<!-- Navigation & Progress -->
+<div class="px-6 pt-4 pb-2">
+<div class="flex justify-between items-center mb-6">
+<button class="w-10 h-10 flex items-center justify-start rounded-full text-slate-400 hover:text-primary transition-colors">
+<span class="material-icons">arrow_back_ios</span>
+</button>
+<div class="text-xs font-medium text-neutral-text-muted dark:text-slate-400 uppercase tracking-widest">
+                    Step 1 of 5
+                </div>
+<div class="w-10"></div> <!-- Spacer for balance -->
+</div>
+<!-- Progress Bar -->
+<div class="w-full h-1 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-1/5 rounded-full"></div>
+</div>
+</div>
+<!-- Main Content Area -->
+<div class="flex-1 px-8 pt-12">
+<header class="mb-12">
+<h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white mb-3">
+                    Define your vision
+                </h1>
+<p class="text-lg text-neutral-text-muted dark:text-slate-400 leading-relaxed">
+                    In one sentence, what does your company do?
+                </p>
+</header>
+<div class="space-y-4">
+<div class="relative">
+<textarea class="w-full p-5 text-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all placeholder:text-slate-300 dark:placeholder:text-slate-600 resize-none font-medium" placeholder="e.g., We provide AI-driven logistics for global retailers." rows="4"></textarea>
+<div class="absolute bottom-4 right-4 text-xs text-slate-400 font-medium">
+                        0/120
+                    </div>
+</div>
+<p class="text-sm text-slate-400 dark:text-slate-500 italic px-1">
+                    This helps us calibrate your market signals.
+                </p>
+</div>
+</div>
+<!-- Visual Decorative Element (Subtle Gradient Radar Theme) -->
+<div class="absolute bottom-32 left-0 right-0 h-40 pointer-events-none overflow-hidden opacity-10 dark:opacity-20">
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] border border-primary/30 rounded-full"></div>
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] border border-primary/20 rounded-full"></div>
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] border border-primary/10 rounded-full"></div>
+</div>
+<!-- Footer Button -->
+<div class="px-8 pb-12 pt-4 bg-gradient-to-t from-white dark:from-slate-900 via-white dark:via-slate-900 to-transparent">
+<button class="w-full py-4 bg-primary text-white font-semibold rounded-xl text-lg shadow-lg shadow-primary/25 hover:bg-blue-600 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+<span>Continue</span>
+<span class="material-icons text-base">arrow_forward</span>
+</button>
+<!-- Home Indicator (iOS) -->
+<div class="mt-8 flex justify-center">
+<div class="w-32 h-1 bg-slate-300 dark:bg-slate-700 rounded-full"></div>
+</div>
+</div>
+<!-- Background Image/Pattern subtle overlay -->
+<div class="absolute top-0 right-0 -z-10 w-48 h-48 bg-primary/5 rounded-full blur-3xl -mr-24 -mt-24"></div>
+<div class="absolute bottom-0 left-0 -z-10 w-48 h-48 bg-primary/5 rounded-full blur-3xl -ml-24 -mb-24"></div>
+</div>
+</body></html>

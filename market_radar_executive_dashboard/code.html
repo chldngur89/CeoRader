@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Market Radar Executive Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#195de6",
+                        "navy-custom": "#0f172a",
+                        "slate-custom": "#334155",
+                        "background-light": "#f8fafc",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer utilities {
+            .no-scrollbar::-webkit-scrollbar {
+                display: none;
+            }
+            .no-scrollbar {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+        }
+        body {
+            background-color: #f8fafc;
+        }
+        .sparkline {
+            stroke-dasharray: 100;
+            stroke-dashoffset: 0;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-display text-slate-custom antialiased">
+<div class="max-w-[430px] mx-auto min-h-screen bg-background-light shadow-2xl flex flex-col relative pb-24">
+<div class="h-12 w-full flex justify-between items-center px-6">
+<span class="text-[15px] font-semibold">9:41</span>
+<div class="flex gap-1.5 items-center">
+<span class="material-symbols-outlined text-[18px]">signal_cellular_alt</span>
+<span class="material-symbols-outlined text-[18px]">wifi</span>
+<span class="material-symbols-outlined text-[18px]">battery_full</span>
+</div>
+</div>
+<header class="px-5 py-2 space-y-4">
+<div class="flex justify-between items-center">
+<h1 class="text-xl font-bold text-navy-custom tracking-tight">Market Radar</h1>
+<div class="flex bg-slate-200/50 p-1 rounded-lg">
+<button class="px-3 py-1 text-[10px] font-bold text-navy-custom bg-white shadow-sm rounded-md">7D</button>
+<button class="px-3 py-1 text-[10px] font-bold text-slate-500">30D</button>
+<button class="px-3 py-1 text-[10px] font-bold text-slate-500">90D</button>
+</div>
+</div>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">search</span>
+<input class="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all placeholder:text-slate-400 shadow-sm" placeholder="Our business keywords..." type="text"/>
+</div>
+</header>
+<section class="mt-6">
+<div class="px-5 flex justify-between items-center mb-3">
+<h2 class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Hot Topics • Top 10</h2>
+<span class="material-symbols-outlined text-slate-400 text-lg">filter_list</span>
+</div>
+<div class="flex overflow-x-auto px-5 gap-3 no-scrollbar pb-2">
+<div class="flex-shrink-0 w-[240px] bg-white border-2 border-primary p-4 rounded-2xl shadow-sm">
+<div class="flex justify-between items-start mb-2">
+<span class="px-2 py-0.5 bg-green-100 text-green-700 text-[9px] font-bold rounded uppercase">Opportunity</span>
+<span class="text-lg font-bold text-navy-custom">94</span>
+</div>
+<h3 class="text-sm font-bold text-navy-custom leading-tight mb-3">Generative AI in Supply Chain</h3>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-green-500 text-sm">trending_up</span>
+<svg class="w-12 h-6" viewBox="0 0 48 24">
+<path d="M0 20 Q12 18, 24 10 T48 4" fill="none" stroke="#22c55e" stroke-width="2"></path>
+</svg>
+</div>
+<span class="text-[10px] font-bold text-slate-400">RANK #1</span>
+</div>
+</div>
+<div class="flex-shrink-0 w-[240px] bg-white border border-slate-200 p-4 rounded-2xl shadow-sm">
+<div class="flex justify-between items-start mb-2">
+<span class="px-2 py-0.5 bg-orange-100 text-orange-700 text-[9px] font-bold rounded uppercase">Threat</span>
+<span class="text-lg font-bold text-navy-custom">78</span>
+</div>
+<h3 class="text-sm font-bold text-slate-700 leading-tight mb-3">Post-Quantum Cryptography</h3>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-slate-400 text-sm">trending_flat</span>
+<svg class="w-12 h-6" viewBox="0 0 48 24">
+<path d="M0 12 Q12 14, 24 12 T48 13" fill="none" stroke="#94a3b8" stroke-width="2"></path>
+</svg>
+</div>
+<span class="text-[10px] font-bold text-slate-400">RANK #2</span>
+</div>
+</div>
+</div>
+</section>
+<main class="px-5 mt-6">
+<div class="bg-navy-custom text-white rounded-[2rem] p-6 shadow-xl relative overflow-hidden">
+<div class="flex justify-between items-start mb-6">
+<div>
+<h2 class="text-2xl font-bold leading-tight">Generative AI Impact</h2>
+<p class="text-slate-400 text-xs font-medium mt-1">Strategic Deep Dive</p>
+</div>
+<div class="flex flex-col items-center">
+<div class="text-3xl font-bold text-primary">94</div>
+<div class="text-[8px] uppercase font-bold tracking-tighter text-slate-400">Relevance</div>
+</div>
+</div>
+<div class="mb-8">
+<p class="text-sm text-slate-300 leading-relaxed font-medium">
+                    LLMs are redefining logistics routing. Current internal benchmarks show a 24% efficiency gap compared to AI-enabled competitors, representing a critical market entry window.
+                </p>
+</div>
+<div class="space-y-4 mb-8">
+<h4 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Related Intelligence</h4>
+<div class="space-y-3">
+<div class="flex gap-3">
+<div class="w-1 h-8 bg-primary rounded-full"></div>
+<div>
+<p class="text-[11px] font-bold line-clamp-1">Global Logistics: AI-First Routing</p>
+<p class="text-[9px] text-slate-500 uppercase font-semibold">Reuters • 4h ago</p>
+</div>
+</div>
+<div class="flex gap-3">
+<div class="w-1 h-8 bg-slate-700 rounded-full"></div>
+<div>
+<p class="text-[11px] font-bold line-clamp-1">Gartner Predicts $20B SCM AI Spend</p>
+<p class="text-[9px] text-slate-500 uppercase font-semibold">Market Watch • 12h ago</p>
+</div>
+</div>
+</div>
+</div>
+<div class="pt-6 border-t border-slate-800">
+<h4 class="text-[10px] font-bold text-primary uppercase tracking-widest mb-4">Strategic Actions</h4>
+<div class="grid grid-cols-2 gap-3">
+<div class="bg-slate-800/50 p-3 rounded-xl border border-slate-700">
+<p class="text-[10px] text-slate-400 font-bold mb-1">01. Pilot</p>
+<p class="text-[11px] font-medium leading-tight">LLM-based dispatch for APAC routes.</p>
+</div>
+<div class="bg-slate-800/50 p-3 rounded-xl border border-slate-700">
+<p class="text-[10px] text-slate-400 font-bold mb-1">02. Talent</p>
+<p class="text-[11px] font-medium leading-tight">Hire 3 Prompt Engineers for Supply Chain.</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+<section class="mt-8 mb-4">
+<div class="px-5 mb-4">
+<h2 class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Actionable Next Steps</h2>
+</div>
+<div class="flex overflow-x-auto px-5 gap-4 no-scrollbar">
+<div class="flex-shrink-0 w-[300px] bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+<div class="flex items-start justify-between mb-4">
+<h4 class="text-sm font-bold text-navy-custom">Dynamic Corridor Optimization</h4>
+<span class="material-symbols-outlined text-primary text-xl">rocket_launch</span>
+</div>
+<div class="space-y-3">
+<div>
+<p class="text-[9px] text-slate-400 uppercase font-bold">Problem</p>
+<p class="text-xs text-slate-600 font-medium leading-snug">Manual load balancing causing 15% revenue leakage in off-peak periods.</p>
+</div>
+<div>
+<p class="text-[9px] text-slate-400 uppercase font-bold">Proposal</p>
+<p class="text-xs text-slate-600 font-medium leading-snug">Deploy an AI-first real-time bidding agent for empty cargo capacity.</p>
+</div>
+<div class="flex flex-wrap gap-2 pt-1">
+<span class="text-[9px] bg-slate-100 px-2 py-0.5 rounded-full font-bold text-slate-500">Logistics</span>
+<span class="text-[9px] bg-slate-100 px-2 py-0.5 rounded-full font-bold text-slate-500">Revenue</span>
+</div>
+</div>
+<div class="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center">
+<span class="text-[10px] font-bold text-slate-400 uppercase">Impact</span>
+<span class="text-xs font-bold text-green-600">+12% Margin Increase</span>
+</div>
+</div>
+<div class="flex-shrink-0 w-[300px] bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+<div class="flex items-start justify-between mb-4">
+<h4 class="text-sm font-bold text-navy-custom">Unified AI Governance</h4>
+<span class="material-symbols-outlined text-primary text-xl">shield_person</span>
+</div>
+<div class="space-y-3">
+<div>
+<p class="text-[9px] text-slate-400 uppercase font-bold">Problem</p>
+<p class="text-xs text-slate-600 font-medium leading-snug">Fragmented AI adoption leading to shadow IT and technical debt.</p>
+</div>
+<div>
+<p class="text-[9px] text-slate-400 uppercase font-bold">Proposal</p>
+<p class="text-xs text-slate-600 font-medium leading-snug">Establish a centralized COE for unified model audit and deployment.</p>
+</div>
+<div class="flex flex-wrap gap-2 pt-1">
+<span class="text-[9px] bg-slate-100 px-2 py-0.5 rounded-full font-bold text-slate-500">Ops</span>
+<span class="text-[9px] bg-slate-100 px-2 py-0.5 rounded-full font-bold text-slate-500">Security</span>
+</div>
+</div>
+<div class="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center">
+<span class="text-[10px] font-bold text-slate-400 uppercase">Impact</span>
+<span class="text-xs font-bold text-primary">Risk Mitigation</span>
+</div>
+</div>
+</div>
+</section>
+<nav class="fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto bg-white/90 backdrop-blur-xl border-t border-slate-200 px-8 py-3 flex justify-between items-center z-50">
+<button class="flex flex-col items-center gap-0.5 text-primary">
+<span class="material-symbols-outlined text-[24px]">radar</span>
+<span class="text-[9px] font-bold uppercase tracking-tighter">Radar</span>
+</button>
+<button class="flex flex-col items-center gap-0.5 text-slate-400">
+<span class="material-symbols-outlined text-[24px]">explore</span>
+<span class="text-[9px] font-bold uppercase tracking-tighter">Signals</span>
+</button>
+<button class="flex flex-col items-center gap-0.5 text-slate-400">
+<span class="material-symbols-outlined text-[24px]">bookmark</span>
+<span class="text-[9px] font-bold uppercase tracking-tighter">Vault</span>
+</button>
+<button class="flex flex-col items-center gap-0.5 text-slate-400">
+<span class="material-symbols-outlined text-[24px]">settings</span>
+<span class="text-[9px] font-bold uppercase tracking-tighter">Config</span>
+</button>
+</nav>
+<div class="fixed bottom-1 left-1/2 -translate-x-1/2 w-32 h-1 bg-slate-200 rounded-full z-[60]"></div>
+</div>
+
+</body></html>

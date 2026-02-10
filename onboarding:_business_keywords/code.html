@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Onboarding: Business Keywords</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#195de6",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#111621",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display flex justify-center items-center min-h-screen">
+<!-- iOS Phone Frame Simulator -->
+<div class="w-[375px] h-[812px] bg-white dark:bg-slate-900 shadow-2xl overflow-hidden relative flex flex-col border border-slate-200 dark:border-slate-800 rounded-[3rem]">
+<!-- Status Bar -->
+<div class="h-11 w-full flex items-center justify-between px-8 pt-4">
+<span class="text-xs font-semibold dark:text-white">9:41</span>
+<div class="flex gap-1.5 items-center">
+<span class="material-icons text-[14px] dark:text-white">signal_cellular_alt</span>
+<span class="material-icons text-[14px] dark:text-white">wifi</span>
+<span class="material-icons text-[14px] dark:text-white">battery_full</span>
+</div>
+</div>
+<!-- Navigation / Header -->
+<div class="px-6 pt-6 pb-4">
+<div class="flex justify-between items-center mb-6">
+<button class="w-10 h-10 flex items-center justify-start text-slate-400 dark:text-slate-500">
+<span class="material-icons">arrow_back_ios</span>
+</button>
+<div class="flex flex-col items-center">
+<span class="text-[10px] uppercase tracking-widest font-bold text-slate-400 dark:text-slate-500">Step 2 of 5</span>
+<div class="flex gap-1 mt-1">
+<div class="h-1 w-4 rounded-full bg-primary/20"></div>
+<div class="h-1 w-6 rounded-full bg-primary"></div>
+<div class="h-1 w-4 rounded-full bg-slate-200 dark:bg-slate-700"></div>
+<div class="h-1 w-4 rounded-full bg-slate-200 dark:bg-slate-700"></div>
+<div class="h-1 w-4 rounded-full bg-slate-200 dark:bg-slate-700"></div>
+</div>
+</div>
+<div class="w-10 h-10"></div> <!-- Spacer for center alignment -->
+</div>
+<h1 class="text-3xl font-bold text-slate-900 dark:text-white mb-2 leading-tight">Key Focus Areas</h1>
+<p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
+                Define the topics and industries you want to track. These keywords will personalize your market signal dashboard.
+            </p>
+</div>
+<!-- Main Content Scrollable Area -->
+<div class="flex-1 overflow-y-auto px-6 space-y-8">
+<!-- Chip Input Area -->
+<div class="space-y-4">
+<div class="flex justify-between items-end">
+<label class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Your Keywords</label>
+<span class="text-xs font-medium text-primary">2 / 5 added</span>
+</div>
+<div class="min-h-[140px] w-full p-4 rounded-xl border-2 border-primary/40 bg-white dark:bg-slate-800 flex flex-wrap gap-2 items-start content-start">
+<!-- Active Chips -->
+<div class="flex items-center gap-1.5 bg-primary text-white px-3 py-1.5 rounded-full text-sm font-medium">
+<span>FinTech</span>
+<span class="material-icons text-sm opacity-70 cursor-pointer">close</span>
+</div>
+<div class="flex items-center gap-1.5 bg-primary text-white px-3 py-1.5 rounded-full text-sm font-medium">
+<span>Machine Learning</span>
+<span class="material-icons text-sm opacity-70 cursor-pointer">close</span>
+</div>
+<!-- Input -->
+<input class="flex-1 min-w-[120px] border-none focus:ring-0 bg-transparent text-sm p-1.5 text-slate-800 dark:text-white placeholder:text-slate-400" placeholder="Add a keyword..." type="text"/>
+</div>
+</div>
+<!-- Suggestions -->
+<div class="space-y-4">
+<div class="flex items-center gap-2">
+<span class="material-icons text-slate-400 text-sm">auto_awesome</span>
+<h3 class="text-sm font-semibold text-slate-700 dark:text-slate-300">Suggested for you</h3>
+</div>
+<div class="flex flex-wrap gap-2">
+<button class="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-full text-sm font-medium text-slate-600 dark:text-slate-400 transition-colors">
+                        + AI
+                    </button>
+<button class="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-full text-sm font-medium text-slate-600 dark:text-slate-400 transition-colors">
+                        + Sustainability
+                    </button>
+<button class="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-full text-sm font-medium text-slate-600 dark:text-slate-400 transition-colors">
+                        + Logistics
+                    </button>
+<button class="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-full text-sm font-medium text-slate-600 dark:text-slate-400 transition-colors">
+                        + Cybersecurity
+                    </button>
+<button class="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-full text-sm font-medium text-slate-600 dark:text-slate-400 transition-colors">
+                        + E-commerce
+                    </button>
+<button class="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-full text-sm font-medium text-slate-600 dark:text-slate-400 transition-colors">
+                        + Renewable Energy
+                    </button>
+</div>
+</div>
+<!-- Context Hint Card -->
+<div class="bg-primary/5 border border-primary/10 rounded-xl p-4 flex gap-4">
+<div class="w-10 h-10 shrink-0 bg-primary/10 rounded-lg flex items-center justify-center">
+<span class="material-icons text-primary">tips_and_updates</span>
+</div>
+<div>
+<h4 class="text-sm font-semibold text-primary mb-1">CEO Tip</h4>
+<p class="text-xs text-slate-600 dark:text-slate-400 leading-normal">
+                        Add specific competitor names as keywords to receive direct tactical updates on their movements.
+                    </p>
+</div>
+</div>
+</div>
+<!-- Footer Actions -->
+<div class="p-6 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 space-y-3">
+<button class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-4 rounded-xl shadow-lg shadow-primary/20 flex items-center justify-center gap-2 group transition-all">
+                Continue
+                <span class="material-icons text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+<button class="w-full text-slate-400 dark:text-slate-500 text-sm font-semibold py-2">
+                I'll do this later
+            </button>
+</div>
+<!-- iOS Home Indicator -->
+<div class="pb-2 flex justify-center">
+<div class="w-32 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full"></div>
+</div>
+</div>
+</body></html>

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Onboarding: Competitors - Market Radar</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#195de6",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#111621",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-display bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 antialiased h-screen flex flex-col">
+<!-- iOS Status Bar Placeholder -->
+<div class="h-12 w-full flex items-center justify-between px-6 shrink-0">
+<span class="text-sm font-semibold">9:41</span>
+<div class="flex items-center space-x-2">
+<span class="material-icons text-sm">signal_cellular_alt</span>
+<span class="material-icons text-sm">wifi</span>
+<span class="material-icons text-sm">battery_full</span>
+</div>
+</div>
+<!-- Header & Progress -->
+<header class="px-6 pt-4">
+<div class="flex items-center justify-between mb-8">
+<button class="w-10 h-10 flex items-center justify-start text-slate-500">
+<span class="material-icons">arrow_back_ios</span>
+</button>
+<div class="flex flex-col items-center">
+<span class="text-[10px] font-bold uppercase tracking-widest text-primary mb-1">Step 3 of 5</span>
+<div class="flex gap-1.5">
+<div class="h-1 w-4 bg-primary rounded-full"></div>
+<div class="h-1 w-4 bg-primary rounded-full"></div>
+<div class="h-1 w-8 bg-primary rounded-full"></div>
+<div class="h-1 w-4 bg-primary/20 dark:bg-primary/10 rounded-full"></div>
+<div class="h-1 w-4 bg-primary/20 dark:bg-primary/10 rounded-full"></div>
+</div>
+</div>
+<button class="w-10 h-10 flex items-center justify-end text-slate-400">
+<span class="material-icons">help_outline</span>
+</button>
+</div>
+<h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white mb-2">Who are we watching?</h1>
+<p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
+            We’ll track their market moves, funding rounds, and product updates for your dashboard.
+        </p>
+</header>
+<!-- Content Area -->
+<main class="flex-1 px-6 pt-8 overflow-y-auto">
+<!-- Input Field -->
+<div class="relative group mb-8">
+<div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+<span class="material-icons text-slate-400 group-focus-within:text-primary">search</span>
+</div>
+<input class="w-full bg-white dark:bg-slate-800/50 border-0 ring-1 ring-slate-200 dark:ring-slate-700 focus:ring-2 focus:ring-primary rounded-xl py-4 pl-12 pr-16 shadow-sm transition-all text-base placeholder:text-slate-400" placeholder="Enter domain or company name..." type="text"/>
+<button class="absolute right-2 top-2 bottom-2 px-4 bg-primary text-white rounded-lg font-medium text-sm hover:bg-blue-700 transition-colors shadow-sm">
+                Add
+            </button>
+</div>
+<!-- Suggestion Badges -->
+<div class="mb-10">
+<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Suggested</p>
+<div class="flex flex-wrap gap-2">
+<button class="flex items-center bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full px-3 py-1.5 text-xs font-medium hover:border-primary transition-colors">
+<span class="material-icons text-sm mr-1.5 text-slate-400">add</span>
+                    Stripe
+                </button>
+<button class="flex items-center bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full px-3 py-1.5 text-xs font-medium hover:border-primary transition-colors">
+<span class="material-icons text-sm mr-1.5 text-slate-400">add</span>
+                    Revolut
+                </button>
+<button class="flex items-center bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full px-3 py-1.5 text-xs font-medium hover:border-primary transition-colors">
+<span class="material-icons text-sm mr-1.5 text-slate-400">add</span>
+                    Adyen
+                </button>
+</div>
+</div>
+<!-- Competitor List -->
+<div class="space-y-3">
+<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Watching (2)</p>
+<!-- List Item 1 -->
+<div class="flex items-center justify-between p-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm">
+<div class="flex items-center space-x-3">
+<div class="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center overflow-hidden">
+<img alt="Company Logo" class="w-6 h-6 object-contain" data-alt="Minimalist technology company logo icon" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAylCyR_b5kSTekjUWqlEgupZJ6m2Ak0KHC5ABlNlyynqgnBnuJLuEfbdKoB5B_kVDTyCKJpA3QuJjXKj1u0-fukEuaYKh_zHZB7CBV4QDiKu1sk92gQ3zj3ttVk_x_dVtJCMqBPu-wyYhET73XDT8UORi9apCfEJ1G5tV2Wbm2YcISI8V6l2wmnw3_sbTIM5cPoHEqol7RirW_5Xn3bPWB2cVFrB0hWOz7Ot60--QvARU1q4ix9iu9ne-6GIqQXoq9jq72nSiRoWGj"/>
+</div>
+<div>
+<h3 class="font-semibold text-sm">TechCrunch.com</h3>
+<p class="text-[10px] text-slate-500">Market Competitor</p>
+</div>
+</div>
+<button class="w-8 h-8 flex items-center justify-center text-slate-300 hover:text-red-500 transition-colors">
+<span class="material-icons text-lg">close</span>
+</button>
+</div>
+<!-- List Item 2 -->
+<div class="flex items-center justify-between p-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm">
+<div class="flex items-center space-x-3">
+<div class="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center overflow-hidden">
+<img alt="Company Logo" class="w-6 h-6 object-contain" data-alt="Corporate abstract business logo mark" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDcN1s9DbcSvA8Zj1pnHT2UWg_hBWQKV91B7l0vStrDK0LDPPHvWFGomhYQk5brAqSPYg9u3XBGs1X-yDUf7-KeSndHyO7miZvdUNKEn8w8MJGireLa88TTBALzL8fXLbDVabKa_xH_yCy0fASmA0V_8YCdRnjgtosVH8-OLru9WOuHmeB94Tir0lRBfW2xEdQxa1G2OrmxSg4msFj93e3MbSTB2rHD2Iuwfv1Og7aohk1UhnAGRYxK4i_J1V7LDpzffOs0TBIvgIap"/>
+</div>
+<div>
+<h3 class="font-semibold text-sm">OpenAI</h3>
+<p class="text-[10px] text-slate-500">Direct Competitor</p>
+</div>
+</div>
+<button class="w-8 h-8 flex items-center justify-center text-slate-300 hover:text-red-500 transition-colors">
+<span class="material-icons text-lg">close</span>
+</button>
+</div>
+</div>
+</main>
+<!-- Bottom Actions -->
+<footer class="p-6 pb-10 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-t border-slate-100 dark:border-slate-800 shrink-0">
+<button class="w-full bg-primary text-white font-semibold py-4 rounded-xl shadow-lg shadow-primary/20 active:scale-[0.98] transition-all mb-4">
+            Continue
+        </button>
+<button class="w-full text-slate-400 dark:text-slate-500 font-medium py-2 text-sm hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
+            Skip for now
+        </button>
+<!-- iOS Home Indicator -->
+<div class="mt-6 flex justify-center">
+<div class="w-32 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full"></div>
+</div>
+</footer>
+
+```</body></html>

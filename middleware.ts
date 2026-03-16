@@ -1,77 +1,32 @@
-import { createServerClient, type CookieOptions } from '@supabase/ssr'
-import { NextResponse, type NextRequest } from 'next/server'
+import { NextResponse, type NextRequest } from "next/server";
 
-export async function middleware(request: NextRequest) {
-  let response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
-  })
+import { DEMO_SESSION_COOKIE, DEMO_SESSION_VALUE } from "@/lib/app/session";
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return request.cookies.get(name)?.value
-        },
-        set(name: string, value: string, options: CookieOptions) {
-          request.cookies.set({
-            name,
-            value,
-            ...options,
-          })
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          })
-          response.cookies.set({
-            name,
-            value,
-            ...options,
-          })
-        },
-        remove(name: string, options: CookieOptions) {
-          request.cookies.set({
-            name,
-            value: '',
-            ...options,
-          })
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          })
-          response.cookies.set({
-            name,
-            value: '',
-            ...options,
-          })
-        },
-      },
-    }
-  )
+const PUBLIC_PATHS = ["/login", "/test"];
+const PUBLIC_PREFIXES = ["/api", "/auth/callback"];
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+function isPublicPath(pathname: string) {
+  return (
+    PUBLIC_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`)) ||
+    PUBLIC_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))
+  );
+}
 
-  const isLoginPage = request.nextUrl.pathname === '/login';
+export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  const hasDemoSession = request.cookies.get(DEMO_SESSION_COOKIE)?.value === DEMO_SESSION_VALUE;
 
-  if (user && isLoginPage) {
-    return NextResponse.redirect(new URL('/', request.url));
+  if (hasDemoSession && pathname === "/login") {
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
-
-  if (user && isLoginPage) {
-    return NextResponse.redirect(new URL('/', request.url));
+  if (!hasDemoSession && !isPublicPath(pathname)) {
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  return response
+  return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 };

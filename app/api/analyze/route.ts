@@ -1,52 +1,74 @@
-import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
-import { MarketAgentEngine } from '@/lib/agents/engine';
+import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(req: Request) {
-    const { topicId } = await req.json();
+import { buildTopicBrief } from "@/lib/analysis/topic-brief";
+import { ollama } from "@/lib/ai/ollama";
 
-    if (!topicId) {
-        return NextResponse.json({ error: 'Missing topicId' }, { status: 400 });
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const topic = typeof body.topic === "string" ? body.topic.trim() : "";
+    const description = typeof body.description === "string" ? body.description.trim() : "";
+    const keywords = Array.isArray(body.keywords)
+      ? body.keywords.filter((item: unknown): item is string => typeof item === "string")
+      : [];
+    const trackedCompanies = Array.isArray(body.trackedCompanies)
+      ? body.trackedCompanies
+          .filter((item: unknown): item is Record<string, unknown> => !!item && typeof item === "object")
+          .map((item: Record<string, unknown>) => ({
+            id: typeof item.id === "string" ? item.id : undefined,
+            name: typeof item.name === "string" ? item.name : "",
+            website: typeof item.website === "string" ? item.website : "",
+          }))
+      : [];
+
+    if (!topic) {
+      return NextResponse.json({ error: "Topic required" }, { status: 400 });
     }
 
-    try {
-        // 1. Fetch raw market data for the topic
-        const { data: rawData, error: dbError } = await supabase
-            .from('market_data')
-            .select('content, title')
-            .eq('topic_id', topicId)
-            .order('collected_at', { ascending: false })
-            .limit(10);
+    const result = await buildTopicBrief({
+      topic,
+      description,
+      keywords,
+      companyName: typeof body.companyName === "string" ? body.companyName.trim() : "",
+      companyWebsite: typeof body.companyWebsite === "string" ? body.companyWebsite.trim() : "",
+      trackedCompanies,
+      sourceLimit:
+        typeof body.sourceLimit === "number" && body.sourceLimit > 0
+          ? Math.min(body.sourceLimit, 4)
+          : 3,
+    });
 
-        if (dbError) throw dbError;
-        if (!rawData || rawData.length === 0) {
-            return NextResponse.json({ error: 'No market data found. Run crawl first.' }, { status: 404 });
-        }
+    return NextResponse.json({
+      success: true,
+      topic,
+      analysis: result.analysis,
+      sources: result.sources,
+      useRealData: result.useRealData,
+      timestamp: result.analysis.generatedAt,
+    });
+  } catch (error) {
+    console.error("Topic brief error:", error);
+    return NextResponse.json(
+      { error: "Analysis failed", message: (error as Error).message },
+      { status: 500 }
+    );
+  }
+}
 
-        // 2. Prepare data for agents
-        const topicInfo = await supabase.from('topics').select('name').eq('id', topicId).single();
-        const combinedText = rawData.map(d => `[${d.title}] ${d.content}`).join('\n');
+export async function GET() {
+  const healthy = await ollama.checkHealth();
+  const models = healthy ? await ollama.listModels() : [];
 
-        // 3. Run Agent Engine (Radar -> Strategy -> Opportunity)
-        const engine = new MarketAgentEngine();
-        const analysis = await engine.fullFlow(topicInfo.data?.name || 'Market Analysis', [combinedText]);
-
-        // 4. Save results to Supabase
-        const { error: insertError } = await supabase.from('analysis_results').insert({
-            topic_id: topicId,
-            radar_summary: analysis.radar.summary || JSON.stringify(analysis.radar),
-            detected_events: analysis.radar.events || analysis.radar,
-            strategy_impact: analysis.strategy.impact || JSON.stringify(analysis.strategy),
-            significance_score: analysis.strategy.score || 70,
-            action_items: analysis.opportunity.action_items || [],
-            opportunities: analysis.opportunity.opportunities || []
-        });
-
-        if (insertError) throw insertError;
-
-        return NextResponse.json({ message: 'Analysis complete', analysis });
-    } catch (error: any) {
-        console.error('Analysis Error:', error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
-    }
+  return NextResponse.json({
+    status: healthy ? "ok" : "warning",
+    ollama: healthy,
+    models,
+    engine: "radar-search",
+    message: healthy
+      ? "Local topic brief engine ready"
+      : "Topic brief works without Ollama, but local model refinement is unavailable",
+  });
 }

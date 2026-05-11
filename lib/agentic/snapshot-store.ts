@@ -448,6 +448,14 @@ export function diffSnapshots(
   source: TrackedSource
 ): SnapshotDiff {
   if (!previous) {
+    const initialChangeTypes = inferChangeTypes(source.type, current.blocks.slice(0, 6), []);
+    const structured = buildStructuredChanges(
+      source.type,
+      initialChangeTypes.length > 0 ? initialChangeTypes : [source.type],
+      current.blocks.slice(0, 8),
+      []
+    );
+
     return {
       status: "initial",
       summary: buildDiffSummary(source, "initial", ["initial"], current.blocks.slice(0, 3), []),
@@ -455,7 +463,7 @@ export function diffSnapshots(
       changeTypes: ["initial"],
       added: current.blocks.slice(0, 5),
       removed: [],
-      structured: createEmptyStructuredChangeSet(),
+      structured,
       currentSnapshotAt: current.collectedAt,
     };
   }

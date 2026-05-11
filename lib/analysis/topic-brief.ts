@@ -4,6 +4,7 @@ import {
   type RadarSearchIntent,
 } from "@/lib/search/radar-search";
 import { runAgenticRadar, type AgenticRadarSignal } from "@/lib/agentic/radar";
+import type { CorrelatedEvent } from "@/lib/app/intelligence";
 import type {
   TopicBriefAction,
   TopicBriefAnalysis,
@@ -528,6 +529,25 @@ function buildWatchouts(
   return watchouts.slice(0, 4);
 }
 
+function fallbackEvents(topic: string, insights: TopicBriefInsight[]): CorrelatedEvent[] {
+  return insights.map((insight, index) => ({
+    id: `event-${topic}-${index + 1}`,
+    company: topic,
+    title: insight.title,
+    summary: insight.summary,
+    changeTypes: [insight.lens === "competition" ? "product" : insight.lens === "talent" ? "hiring" : insight.lens === "regulation" ? "messaging" : insight.lens === "infrastructure" ? "product" : "messaging"],
+    evidenceIds: insight.evidenceIds,
+    importance: insight.priority === "high" ? 82 : insight.priority === "medium" ? 68 : 54,
+    confidence: insight.confidence,
+    recommendedAction: actionForInsight(insight).title,
+    occurredAt: new Date().toISOString(),
+    evidenceCount: insight.evidenceIds.length,
+    sourceKinds: ["news"],
+    facts: [],
+    evidence: [],
+  }));
+}
+
 function diversifyDocuments(documents: RadarSearchDocument[]) {
   const grouped = new Map<TopicBriefLens, RadarSearchDocument[]>();
 
@@ -698,11 +718,7 @@ export async function buildTopicBrief({
       changedOfficialSignals: officialSignals.filter((item) => item.status === "changed").length,
       trackedCompaniesScanned: radar?.overview.scannedCompanies || 0,
     },
-    events: insights.map((insight) => ({
-      title: insight.title,
-      description: insight.summary,
-      impact: insight.priority,
-    })),
+    events: radar?.events?.length ? radar.events.slice(0, 8) : fallbackEvents(topic, insights).slice(0, 6),
     generatedAt: new Date().toISOString(),
     engine: "radar-search",
   };

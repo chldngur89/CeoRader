@@ -6,240 +6,250 @@ import { useEffect, useMemo, useState } from "react";
 import BottomNav from "@/components/layout/BottomNav";
 import MobileContainer from "@/components/layout/MobileContainer";
 import {
-  trackedCompaniesSignature,
-  type CachedRadarResponse,
-  type RadarResponse,
-  type RadarSignal,
-} from "@/lib/app/radar-cache";
-import { STORAGE_KEYS, hasConfiguredTrackedCompanies, normalizeOnboardingData, type OnboardingData } from "@/lib/app/state";
+  normalizeActionItems,
+  type ActionItem,
+  type ActionOwner,
+  type ActionPriority,
+  type ActionStatus,
+} from "@/lib/app/actions";
+import { STORAGE_KEYS } from "@/lib/app/state";
 import { normalizeVaultItems } from "@/lib/app/vault";
 
+const STATUS_ORDER: ActionStatus[] = ["todo", "doing", "done"];
+const STATUS_LABEL: Record<ActionStatus, string> = {
+  todo: "Todo",
+  doing: "Doing",
+  done: "Done",
+};
+
+const PRIORITY_STYLE: Record<ActionPriority, string> = {
+  high: "bg-rose-100 text-rose-700",
+  medium: "bg-amber-100 text-amber-700",
+  low: "bg-slate-100 text-slate-600",
+};
+
 export default function PriorityBoardPage() {
-  const [data, setData] = useState<OnboardingData | null>(null);
-  const [radar, setRadar] = useState<RadarResponse | null>(null);
+  const [actions, setActions] = useState<ActionItem[]>([]);
+  const [filterOwner, setFilterOwner] = useState<"all" | ActionOwner>("all");
+  const [filterPriority, setFilterPriority] = useState<"all" | ActionPriority>("all");
   const [vaultCount, setVaultCount] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const raw = localStorage.getItem(STORAGE_KEYS.onboarding);
-    if (!raw) {
-      setLoading(false);
-      return;
-    }
-
-    const parsed = normalizeOnboardingData(JSON.parse(raw));
-    setData(parsed);
-
+    const rawActions = localStorage.getItem(STORAGE_KEYS.actions);
     const rawVault = localStorage.getItem(STORAGE_KEYS.vault);
-    if (rawVault) {
-      setVaultCount(normalizeVaultItems(JSON.parse(rawVault)).length);
-    }
 
-    const cachedRadar = localStorage.getItem(STORAGE_KEYS.radarCache);
-    if (cachedRadar) {
-      try {
-        const parsedRadar = JSON.parse(cachedRadar) as CachedRadarResponse;
-        setRadar(parsedRadar);
-        setLoading(false);
-        return;
-      } catch {
-        localStorage.removeItem(STORAGE_KEYS.radarCache);
-      }
-    }
-
-    if (hasConfiguredTrackedCompanies(parsed)) {
-      void refreshRadar(parsed);
-    } else {
-      setLoading(false);
-    }
+    setActions(normalizeActionItems(rawActions ? JSON.parse(rawActions) : []));
+    setVaultCount(normalizeVaultItems(rawVault ? JSON.parse(rawVault) : []).length);
   }, []);
 
-  async function refreshRadar(current = data) {
-    if (!current || !hasConfiguredTrackedCompanies(current)) {
-      setLoading(false);
-      return;
-    }
+  function persist(nextActions: ActionItem[]) {
+    setActions(nextActions);
+    localStorage.setItem(STORAGE_KEYS.actions, JSON.stringify(nextActions));
 
-    try {
-      setRefreshing(true);
-      setError(null);
-      const response = await fetch("/api/agentic/radar", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          companyName: current.companyName,
-          companyWebsite: current.companyWebsite,
-          description: current.description,
-          goals: current.goals,
-          keywords: current.keywords,
-          trackedCompanies: current.trackedCompanies,
-          sourceLimit: 4,
-        }),
-      });
-
-      const payload = await response.json();
-      if (!response.ok) {
-        throw new Error(payload.message || payload.error || "우선순위 보드를 만들지 못했습니다.");
-      }
-
-      const nextRadar = payload as RadarResponse;
-      setRadar(nextRadar);
-
-      const cached: CachedRadarResponse = {
-        ...nextRadar,
-        trackedCompaniesSignature: trackedCompaniesSignature(current.trackedCompanies),
-      };
-      localStorage.setItem(STORAGE_KEYS.radarCache, JSON.stringify(cached));
-    } catch (requestError: any) {
-      setError(requestError.message || "우선순위 보드를 만들지 못했습니다.");
-    } finally {
-      setRefreshing(false);
-      setLoading(false);
-    }
+    const rawVault = localStorage.getItem(STORAGE_KEYS.vault);
+    const vaultItems = normalizeVaultItems(rawVault ? JSON.parse(rawVault) : []);
+    const nextVault = vaultItems.map((item) => {
+      const linked = nextActions.find((action) => `vault-${action.id}` === item.id);
+      return linked
+        ? {
+            ...item,
+            actionStatus: linked.status,
+            owner: linked.owner,
+            horizon: linked.horizon,
+            priority: linked.priority,
+          }
+        : item;
+    });
+    localStorage.setItem(STORAGE_KEYS.vault, JSON.stringify(nextVault));
   }
 
-  const topSignals = useMemo(
-    () => [...(radar?.signals || [])].sort((left, right) => right.importance - left.importance).slice(0, 5),
-    [radar]
-  );
+  function moveAction(actionId: string, status: ActionStatus) {
+    persist(actions.map((action) => (action.id === actionId ? { ...action, status } : action)));
+  }
 
-  const companyScores = useMemo(() => {
-    const scores = new Map<string, number>();
-    for (const signal of radar?.signals || []) {
-      scores.set(signal.company, (scores.get(signal.company) || 0) + signal.importance);
-    }
+  const filteredActions = useMemo(() => {
+    return actions.filter((action) => {
+      if (filterOwner !== "all" && action.owner !== filterOwner) {
+        return false;
+      }
+      if (filterPriority !== "all" && action.priority !== filterPriority) {
+        return false;
+      }
+      return true;
+    });
+  }, [actions, filterOwner, filterPriority]);
 
-    return Array.from(scores.entries())
-      .map(([company, score]) => ({ company, score }))
-      .sort((left, right) => right.score - left.score)
-      .slice(0, 5);
-  }, [radar]);
+  const actionsByStatus = useMemo(() => {
+    return STATUS_ORDER.reduce<Record<ActionStatus, ActionItem[]>>(
+      (accumulator, status) => ({
+        ...accumulator,
+        [status]: filteredActions
+          .filter((action) => action.status === status)
+          .sort((left, right) => {
+            const priorityWeight = { high: 3, medium: 2, low: 1 };
+            return priorityWeight[right.priority] - priorityWeight[left.priority];
+          }),
+      }),
+      {
+        todo: [],
+        doing: [],
+        done: [],
+      }
+    );
+  }, [filteredActions]);
 
-  const opportunities = (radar?.signals || []).filter((signal) => signal.category === "opportunity").length;
-  const threats = (radar?.signals || []).filter((signal) => signal.category === "threat").length;
-  const trends = (radar?.signals || []).filter((signal) => signal.category === "trend").length;
-  const avgPriority =
-    radar && radar.signals.length > 0
-      ? Math.round(radar.signals.reduce((sum, signal) => sum + signal.importance, 0) / radar.signals.length)
-      : 0;
+  const stats = {
+    total: actions.length,
+    todo: actions.filter((item) => item.status === "todo").length,
+    doing: actions.filter((item) => item.status === "doing").length,
+    done: actions.filter((item) => item.status === "done").length,
+  };
 
   return (
     <MobileContainer>
       <header className="px-5 py-4">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-bold text-navy-custom tracking-tight">우선순위 보드</h1>
-            <p className="text-sm text-slate-500 mt-1">
-              변화 강도와 실행 우선순위를 한 화면에서 정렬합니다.
-            </p>
-          </div>
-          {data && hasConfiguredTrackedCompanies(data) && (
-            <button
-              onClick={() => refreshRadar()}
-              disabled={refreshing}
-              className="rounded-xl bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-700 disabled:opacity-60"
-            >
-              {refreshing ? "갱신 중..." : "갱신"}
-            </button>
-          )}
-        </div>
+        <h1 className="text-2xl font-bold text-navy-custom tracking-tight">액션 보드</h1>
+        <p className="text-sm text-slate-500 mt-1">
+          브리프와 신호에서 만든 실행 항목을 개인 보드에서 관리합니다.
+        </p>
       </header>
 
       <main className="flex-1 px-5 pb-24 space-y-5">
-        {!data ? (
-          <EmptyState />
-        ) : (
-          <>
-            <section className="grid grid-cols-4 gap-3">
-              <Metric label="평균 우선순위" value={String(avgPriority)} />
-              <Metric label="기회" value={String(opportunities)} />
-              <Metric label="위협" value={String(threats)} />
-              <Metric label="저장 항목" value={String(vaultCount)} />
-            </section>
+        <section className="grid grid-cols-4 gap-3">
+          <Metric label="전체" value={String(stats.total)} />
+          <Metric label="Todo" value={String(stats.todo)} />
+          <Metric label="Doing" value={String(stats.doing)} />
+          <Metric label="Done" value={String(stats.done)} />
+        </section>
 
-            {loading ? (
-              <LoadingState />
-            ) : error ? (
-              <div className="rounded-2xl bg-rose-50 p-4 text-sm text-rose-700">{error}</div>
-            ) : radar ? (
-              <>
-                <section className="rounded-3xl bg-gradient-to-br from-emerald-500 to-blue-600 p-6 text-white">
-                  <p className="text-xs uppercase tracking-[0.24em] text-white/70">Priority Summary</p>
-                  <h2 className="mt-2 text-2xl font-bold">{radar.overview.headline}</h2>
-                  <p className="mt-3 text-sm text-white/80">{radar.overview.summary}</p>
-                  <div className="mt-4 grid grid-cols-3 gap-3">
-                    <PriorityMini label="트렌드" value={String(trends)} />
-                    <PriorityMini label="스캔 회사" value={String(radar.overview.scannedCompanies)} />
-                    <PriorityMini label="에러" value={String(radar.overview.errors)} />
-                  </div>
-                </section>
+        <section className="rounded-3xl bg-gradient-to-br from-emerald-500 to-blue-600 p-6 text-white">
+          <p className="text-xs uppercase tracking-[0.24em] text-white/70">Personal Workflow</p>
+          <h2 className="mt-2 text-2xl font-bold">
+            {stats.total > 0 ? `${stats.todo}개가 아직 실행 대기 중입니다` : "아직 액션이 없습니다"}
+          </h2>
+          <p className="mt-3 text-sm text-white/80">
+            액션은 `/brief`의 실행안과 `/signals`의 이벤트/신호에서 생성됩니다. 현재 금고 항목 {vaultCount}개가 저장되어 있습니다.
+          </p>
+          <div className="mt-4 flex gap-2">
+            <Link href="/brief" className="rounded-xl bg-white/10 px-4 py-3 text-sm font-semibold text-white">
+              브리프 열기
+            </Link>
+            <Link href="/signals" className="rounded-xl bg-white/10 px-4 py-3 text-sm font-semibold text-white">
+              신호 열기
+            </Link>
+          </div>
+        </section>
 
-                <section className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-[11px] font-bold uppercase tracking-widest text-slate-400">
-                      Top Signals
-                    </h2>
-                    <Link href="/signals" className="text-xs font-semibold text-primary">
-                      전체 보기
-                    </Link>
-                  </div>
+        <section className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm space-y-4">
+          <div className="flex flex-wrap gap-2">
+            {(["all", "CEO", "Product", "Sales", "Ops"] as const).map((owner) => (
+              <button
+                key={owner}
+                onClick={() => setFilterOwner(owner)}
+                className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
+                  filterOwner === owner ? "bg-navy-custom text-white" : "bg-slate-100 text-slate-600"
+                }`}
+              >
+                {owner}
+              </button>
+            ))}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {(["all", "high", "medium", "low"] as const).map((priority) => (
+              <button
+                key={priority}
+                onClick={() => setFilterPriority(priority)}
+                className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
+                  filterPriority === priority ? "bg-navy-custom text-white" : "bg-slate-100 text-slate-600"
+                }`}
+              >
+                {priority}
+              </button>
+            ))}
+          </div>
+        </section>
 
-                  {topSignals.map((signal, index) => (
-                    <SignalRow key={signal.id} rank={index + 1} signal={signal} />
-                  ))}
-
-                  {topSignals.length === 0 && (
-                    <div className="rounded-2xl bg-slate-50 p-4 text-sm text-slate-500">
-                      아직 우선순위를 매길 신호가 없습니다. 첫 스캔을 돌리면 이 보드가 채워집니다.
-                    </div>
-                  )}
-                </section>
-
-                <section className="grid grid-cols-1 gap-3">
-                  <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-                    <h2 className="text-sm font-bold text-slate-900">회사별 집중도</h2>
-                    <div className="mt-4 space-y-3">
-                      {companyScores.map((item) => {
-                        const width = Math.max(8, Math.min(100, Math.round((item.score / (topSignals[0]?.importance || 100)) * 32)));
-                        return (
-                          <div key={item.company}>
-                            <div className="mb-1 flex items-center justify-between">
-                              <p className="text-sm font-semibold text-slate-700">{item.company}</p>
-                              <span className="text-xs text-slate-400">{item.score}</span>
-                            </div>
-                            <div className="h-2 rounded-full bg-slate-100">
-                              <div className="h-2 rounded-full bg-navy-custom" style={{ width: `${width}%` }} />
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-                    <h2 className="text-sm font-bold text-slate-900">즉시 실행안</h2>
-                    <div className="mt-4 space-y-3">
-                      {radar.overview.actions.map((action, index) => (
-                        <div key={action} className="rounded-xl bg-slate-50 px-3 py-3">
-                          <p className="text-xs font-bold uppercase tracking-widest text-slate-400">
-                            Action {index + 1}
-                          </p>
-                          <p className="mt-1 text-sm text-slate-700">{action}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </section>
-              </>
-            ) : (
-              <div className="rounded-2xl bg-slate-50 p-4 text-sm text-slate-500">
-                공식 사이트가 등록되면 우선순위 보드가 생성됩니다.
+        <section className="space-y-4">
+          {STATUS_ORDER.map((status) => (
+            <div key={status} className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+              <div className="mb-3 flex items-center justify-between">
+                <h2 className="text-sm font-bold text-slate-900">{STATUS_LABEL[status]}</h2>
+                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600">
+                  {actionsByStatus[status].length}
+                </span>
               </div>
-            )}
-          </>
-        )}
+
+              {actionsByStatus[status].length > 0 ? (
+                <div className="space-y-3">
+                  {actionsByStatus[status].map((action) => (
+                    <div key={action.id} className="rounded-xl bg-slate-50 p-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${PRIORITY_STYLE[action.priority]}`}>
+                              {action.priority}
+                            </span>
+                            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600">
+                              {action.owner}
+                            </span>
+                            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600">
+                              {action.horizon}
+                            </span>
+                            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600">
+                              {action.sourceKind}
+                            </span>
+                          </div>
+                          <h3 className="mt-2 text-sm font-bold text-slate-900">{action.title}</h3>
+                          <p className="mt-2 text-sm text-slate-600">{action.rationale}</p>
+                          {action.tags.length > 0 && (
+                            <div className="mt-3 flex flex-wrap gap-2">
+                              {action.tags.map((tag) => (
+                                <span
+                                  key={`${action.id}-${tag}`}
+                                  className="rounded-full bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-500"
+                                >
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        <div className="text-right text-[11px] text-slate-400">
+                          {action.company && <p>{action.company}</p>}
+                          <p>{new Date(action.createdAt).toLocaleDateString("ko-KR")}</p>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {STATUS_ORDER.filter((item) => item !== status).map((nextStatus) => (
+                          <button
+                            key={`${action.id}-${nextStatus}`}
+                            onClick={() => moveAction(action.id, nextStatus)}
+                            className="rounded-xl bg-white px-3 py-2 text-xs font-semibold text-slate-700"
+                          >
+                            {STATUS_LABEL[nextStatus]}로 이동
+                          </button>
+                        ))}
+                        {action.link && (
+                          <button
+                            onClick={() => window.open(action.link, "_blank", "noopener,noreferrer")}
+                            className="rounded-xl bg-slate-900 px-3 py-2 text-xs font-semibold text-white"
+                          >
+                            근거 열기
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="rounded-xl bg-slate-50 p-4 text-sm text-slate-500">
+                  이 상태의 액션이 없습니다.
+                </div>
+              )}
+            </div>
+          ))}
+        </section>
       </main>
 
       <BottomNav />
@@ -252,67 +262,6 @@ function Metric({ label, value }: { label: string; value: string }) {
     <div className="rounded-2xl bg-slate-50 p-3 text-center">
       <p className="text-lg font-bold text-slate-900">{value}</p>
       <p className="text-[10px] text-slate-500">{label}</p>
-    </div>
-  );
-}
-
-function PriorityMini({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-2xl bg-white/10 p-3 text-center">
-      <p className="text-lg font-bold">{value}</p>
-      <p className="text-[10px] text-white/70">{label}</p>
-    </div>
-  );
-}
-
-function SignalRow({ rank, signal }: { rank: number; signal: RadarSignal }) {
-  return (
-    <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-full bg-slate-900 px-2 py-0.5 text-[10px] font-bold text-white">
-              #{rank}
-            </span>
-            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600">
-              {signal.company}
-            </span>
-            <span className="text-[10px] text-slate-400">{signal.category}</span>
-          </div>
-          <h3 className="mt-2 text-sm font-bold text-slate-900">{signal.title}</h3>
-          <p className="mt-1 text-xs text-slate-500">{signal.recommendation}</p>
-        </div>
-        <div className="text-right">
-          <p className="text-xl font-bold text-navy-custom">{signal.importance}</p>
-          <p className="text-[10px] text-slate-400">priority</p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function EmptyState() {
-  return (
-    <div className="rounded-2xl bg-slate-50 p-5 text-center">
-      <p className="text-sm font-semibold text-slate-800">추적 대상을 먼저 설정하세요</p>
-      <p className="mt-2 text-xs text-slate-500">
-        설정에 경쟁사와 공식 사이트를 입력해야 우선순위 보드가 만들어집니다.
-      </p>
-      <Link
-        href="/config"
-        className="mt-4 inline-flex rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
-      >
-        설정 열기
-      </Link>
-    </div>
-  );
-}
-
-function LoadingState() {
-  return (
-    <div className="flex flex-col items-center justify-center rounded-2xl bg-slate-50 p-8">
-      <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-200 border-t-primary" />
-      <p className="mt-3 text-sm text-slate-500">우선순위 보드를 계산하는 중입니다.</p>
     </div>
   );
 }

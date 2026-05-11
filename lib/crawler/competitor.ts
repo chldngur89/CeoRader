@@ -1,5 +1,10 @@
 import { ollama } from "@/lib/ai/ollama";
 import {
+  buildEventEvidenceMap,
+  buildNewsFacts,
+  correlateFacts,
+} from "@/lib/app/intelligence";
+import {
   radarSearch,
   type RadarSearchDocument,
   type RadarSearchProvider,
@@ -109,6 +114,56 @@ function parseJsonFromText(rawText: string): CompetitorAnalysis | null {
 }
 
 function fallbackAnalysis(company: string, news: CompetitorNews[]): CompetitorAnalysis {
+  const evidenceById = buildEventEvidenceMap(
+    news.map((item, index) => ({
+      id: `${company}-news-${index + 1}`,
+      company,
+      title: item.title,
+      summary: item.snippet,
+      source: item.source,
+      link: item.link,
+      pubDate: item.date,
+      intent: item.intent,
+    })),
+    []
+  );
+  const facts = news.flatMap((item, index) =>
+    buildNewsFacts({
+      id: `${company}-news-${index + 1}`,
+      company,
+      title: item.title,
+      summary: item.snippet,
+      source: item.source,
+      link: item.link,
+      pubDate: item.date,
+      intent: item.intent,
+    })
+  );
+  const events = correlateFacts({
+    company,
+    facts,
+    evidenceById,
+  });
+
+  if (events.length > 0) {
+    return {
+      summary: `${company} 관련 뉴스와 근거를 묶어 ${events.length}건의 핵심 이벤트를 정리했습니다.`,
+      signals: events.slice(0, 4).map((event) => ({
+        title: event.title,
+        category: event.changeTypes.includes("pricing") || event.changeTypes.includes("product") ? "threat" : "trend",
+        importance: event.importance,
+        description: event.summary,
+        sourceIndices: event.evidenceIds
+          .map((evidenceId) => Number(evidenceId.split("-").pop() || ""))
+          .filter((value) => value > 0),
+      })),
+      watchouts: ["결정적 판단 전에는 공식 사이트나 원문 기사로 사실 관계를 다시 확인하세요."],
+      opportunities: events
+        .slice(0, 2)
+        .map((event) => event.recommendedAction || `${event.title} 대응안을 정리하세요.`),
+    };
+  }
+
   const topNews = news.slice(0, 3);
 
   return {

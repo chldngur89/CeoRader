@@ -1,3 +1,4 @@
+import type { CorrelatedEvent } from "@/lib/app/intelligence";
 import type { TrackedCompany } from "@/lib/app/state";
 import type { StructuredChangeSet } from "@/lib/app/structured-change";
 
@@ -55,6 +56,7 @@ export interface RadarResponse {
   overview: RadarOverview;
   companyResults: RadarCompanyResult[];
   signals: RadarSignal[];
+  events: CorrelatedEvent[];
   timestamp: string;
 }
 

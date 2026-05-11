@@ -1,0 +1,61 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e4]: 9:41
+      - generic [ref=e5]:
+        - generic [ref=e6]: signal_cellular_alt
+        - generic [ref=e7]: wifi
+        - generic [ref=e8]: battery_full
+    - banner [ref=e9]:
+      - heading "금고" [level=1] [ref=e10]
+      - paragraph [ref=e11]: 저장한 시장 신호와 실행 메모입니다.
+      - generic [ref=e38]:
+        - generic [ref=e39]: 최근 7일 저장 1건
+        - generic [ref=e40]: 액션 1건
+    - generic [ref=e13]:
+      - button "전체" [ref=e14] [cursor=pointer]
+      - button "신호" [ref=e15] [cursor=pointer]
+      - button "액션" [ref=e16] [cursor=pointer]
+      - button "브리프" [ref=e17] [cursor=pointer]
+    - main [ref=e18]:
+      - generic [ref=e42]:
+        - generic [ref=e43]:
+          - generic [ref=e44]:
+            - generic [ref=e45]: 액션
+            - generic [ref=e46]: Vercel
+          - button "delete" [ref=e47] [cursor=pointer]:
+            - generic [ref=e48]: delete
+        - heading "제품 차별점과 출시 속도 차이를 이번 주 세일즈/제품 우선순위에 반영하세요." [level=3] [ref=e49]
+        - paragraph [ref=e50]: Vercel product 관련 변화가 감지됐습니다. AI가 인간 고용하는 시대 열렸다…"클로드가 내 상사라면 이상적" - 지디넷코리아. 뉴스 기준으로 확인됐습니다.
+        - generic [ref=e51]:
+          - generic [ref=e52]: todo
+          - generic [ref=e53]: Product
+          - generic [ref=e54]: 90d
+          - generic [ref=e55]: medium
+        - generic [ref=e56]:
+          - generic [ref=e57]: "#Vercel"
+          - generic [ref=e58]: "#product"
+        - generic [ref=e59]:
+          - generic [ref=e60]: 2026. 3. 24. 오후 2:07:12
+          - generic [ref=e61]:
+            - link "보드 열기" [ref=e62] [cursor=pointer]:
+              - /url: /finance
+            - button "원문 열기" [ref=e63] [cursor=pointer]
+    - navigation [ref=e24]:
+      - link "radar 레이더" [ref=e25] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e26]: radar
+        - generic [ref=e27]: 레이더
+      - link "notifications_active 시장신호" [ref=e28] [cursor=pointer]:
+        - /url: /signals
+        - generic [ref=e29]: notifications_active
+        - generic [ref=e30]: 시장신호
+      - link "folder_special 금고" [ref=e31] [cursor=pointer]:
+        - /url: /vault
+        - generic [ref=e32]: folder_special
+        - generic [ref=e33]: 금고
+      - link "tune 설정" [ref=e34] [cursor=pointer]:
+        - /url: /config
+        - generic [ref=e35]: tune
+        - generic [ref=e36]: 설정
+  - alert [ref=e64]

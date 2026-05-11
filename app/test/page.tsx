@@ -107,7 +107,11 @@ export default function TestPage() {
                       <li key={i} className="text-sm">
                         <span className="font-medium">{e.title}</span>
                         <br />
-                        <span className="text-slate-500">{e.description}</span>
+                        <span className="text-slate-500">{e.summary}</span>
+                        <br />
+                        <span className="text-xs text-slate-400">
+                          evidence {e.evidenceCount || 0} · confidence {e.confidence || 0}
+                        </span>
                       </li>
                     ))}
                   </ul>

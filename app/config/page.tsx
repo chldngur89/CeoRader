@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 
 import BottomNav from "@/components/layout/BottomNav";
@@ -15,6 +15,8 @@ import {
   splitValues,
   type OnboardingData,
 } from "@/lib/app/state";
+
+const BACKUP_KEYS = Object.values(STORAGE_KEYS);
 
 const GOAL_LABELS: Record<string, string> = {
   market: "시장 확장",
@@ -35,10 +37,13 @@ function clearDerivedCache() {
 
 export default function ConfigPage() {
   const router = useRouter();
+  const importRef = useRef<HTMLInputElement>(null);
   const [user, setUser] = useState<any>(null);
   const [data, setData] = useState<OnboardingData | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<OnboardingData | null>(null);
+  const [backupMsg, setBackupMsg] = useState<string | null>(null);
+  const [backupErr, setBackupErr] = useState<string | null>(null);
 
   useEffect(() => {
     const userData = localStorage.getItem(STORAGE_KEYS.user);
@@ -50,6 +55,48 @@ export default function ConfigPage() {
       setEditData(parsed);
     }
   }, []);
+
+  function handleExportBackup() {
+    setBackupErr(null);
+    const data: Record<string, string | null> = {};
+    for (const k of BACKUP_KEYS) {
+      data[k] = localStorage.getItem(k);
+    }
+    const payload = { v: 1 as const, exportedAt: new Date().toISOString(), data };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `ceorader-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    setBackupMsg("백업 파일을 저장했습니다.");
+  }
+
+  async function handleImportBackupFile(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    setBackupErr(null);
+    setBackupMsg(null);
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const parsed = JSON.parse(text) as { v?: number; data?: Record<string, unknown> };
+      if (parsed.v !== 1 || !parsed.data || typeof parsed.data !== "object") {
+        throw new Error("CeoRader 백업 JSON(v:1)만 사용할 수 있습니다.");
+      }
+      const allowed = new Set<string>(Object.values(STORAGE_KEYS));
+      for (const [k, v] of Object.entries(parsed.data)) {
+        if (!allowed.has(k)) continue;
+        if (v === null || v === undefined) localStorage.removeItem(k);
+        else if (typeof v === "string") localStorage.setItem(k, v);
+      }
+      setBackupMsg("가져오기 완료. 곧 새로고침합니다.");
+      setTimeout(() => window.location.reload(), 400);
+    } catch (err) {
+      setBackupErr(err instanceof Error ? err.message : "가져오기에 실패했습니다.");
+    }
+  }
 
   function handleLogout() {
     clearDerivedCache();
@@ -141,6 +188,43 @@ export default function ConfigPage() {
               <span className="text-white/70">저장 방식</span>
               <span>로컬 agentic state</span>
             </div>
+          </div>
+        </section>
+
+        <section>
+          <h2 className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-3">
+            데이터 (이 브라우저만)
+          </h2>
+          <div className="bg-amber-50 border border-amber-100 rounded-2xl p-4 space-y-3">
+            <p className="text-xs text-amber-900 leading-relaxed">
+              온보딩·금고·분석 등은 <strong>이 기기·이 브라우저</strong>에만 저장됩니다. 다른 PC나
+              시크릿 창에서는 이어지지 않습니다. 백업 파일로 옮기거나 보관할 수 있습니다.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={handleExportBackup}
+                className="px-4 py-2 rounded-xl bg-white border border-amber-200 text-sm font-semibold text-amber-900"
+              >
+                백업 내보내기
+              </button>
+              <button
+                type="button"
+                onClick={() => importRef.current?.click()}
+                className="px-4 py-2 rounded-xl bg-amber-700 text-sm font-semibold text-white"
+              >
+                백업 가져오기
+              </button>
+              <input
+                ref={importRef}
+                type="file"
+                accept="application/json,.json"
+                className="hidden"
+                onChange={handleImportBackupFile}
+              />
+            </div>
+            {backupMsg && <p className="text-xs text-emerald-700">{backupMsg}</p>}
+            {backupErr && <p className="text-xs text-rose-600">{backupErr}</p>}
           </div>
         </section>
 

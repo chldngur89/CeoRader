@@ -1,3 +1,4 @@
+import type { CorrelatedEvent } from "@/lib/app/intelligence";
 import type { StructuredChangeSet } from "@/lib/app/structured-change";
 
 export type TopicBriefLens =
@@ -76,11 +77,7 @@ export interface TopicBriefAnalysis {
     changedOfficialSignals: number;
     trackedCompaniesScanned: number;
   };
-  events: Array<{
-    title: string;
-    description: string;
-    impact: "high" | "medium" | "low";
-  }>;
+  events: CorrelatedEvent[];
   generatedAt: string;
   engine: "radar-search";
 }
@@ -129,9 +126,7 @@ export function normalizeTopicBriefAnalysis(raw: unknown): TopicBriefAnalysis {
       trackedCompaniesScanned:
         typeof metrics.trackedCompaniesScanned === "number" ? metrics.trackedCompaniesScanned : 0,
     },
-    events: Array.isArray(object.events)
-      ? (object.events as TopicBriefAnalysis["events"])
-      : [],
+    events: Array.isArray(object.events) ? (object.events as TopicBriefAnalysis["events"]) : [],
     generatedAt: typeof object.generatedAt === "string" ? object.generatedAt : new Date().toISOString(),
     engine: "radar-search",
   };

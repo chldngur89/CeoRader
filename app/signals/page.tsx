@@ -5,6 +5,14 @@ import { useRouter } from "next/navigation";
 
 import BottomNav from "@/components/layout/BottomNav";
 import MobileContainer from "@/components/layout/MobileContainer";
+import {
+  createActionFromEvent,
+  createActionFromSignal,
+  createVaultItemFromAction,
+  normalizeActionItems,
+  upsertActionItem,
+} from "@/lib/app/actions";
+import type { CorrelatedEvent } from "@/lib/app/intelligence";
 import { formatStructuredHighlights, hasStructuredChanges } from "@/lib/app/structured-change";
 import {
   STORAGE_KEYS,
@@ -37,6 +45,7 @@ export default function SignalsPage() {
   const [booting, setBooting] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [savedIds, setSavedIds] = useState<string[]>([]);
+  const [savedActionIds, setSavedActionIds] = useState<string[]>([]);
 
   useEffect(() => {
     const rawData = localStorage.getItem(STORAGE_KEYS.onboarding);
@@ -51,6 +60,10 @@ export default function SignalsPage() {
     const vaultRaw = localStorage.getItem(STORAGE_KEYS.vault);
     if (vaultRaw) {
       setSavedIds(normalizeVaultItems(JSON.parse(vaultRaw)).map((item) => item.id));
+    }
+    const actionsRaw = localStorage.getItem(STORAGE_KEYS.actions);
+    if (actionsRaw) {
+      setSavedActionIds(normalizeActionItems(JSON.parse(actionsRaw)).map((item) => item.id));
     }
 
     const cachedRaw = localStorage.getItem(STORAGE_KEYS.radarCache);
@@ -148,6 +161,24 @@ export default function SignalsPage() {
     const nextItems = [nextItem, ...items];
     localStorage.setItem(STORAGE_KEYS.vault, JSON.stringify(nextItems));
     setSavedIds(nextItems.map((item) => item.id));
+  }
+
+  function saveAction(action: ReturnType<typeof createActionFromSignal> | ReturnType<typeof createActionFromEvent>) {
+    const rawActions = localStorage.getItem(STORAGE_KEYS.actions);
+    const nextActions = upsertActionItem(
+      normalizeActionItems(rawActions ? JSON.parse(rawActions) : []),
+      action
+    );
+    localStorage.setItem(STORAGE_KEYS.actions, JSON.stringify(nextActions));
+    setSavedActionIds(nextActions.map((item) => item.id));
+
+    const rawVault = localStorage.getItem(STORAGE_KEYS.vault);
+    const currentVault = normalizeVaultItems(rawVault ? JSON.parse(rawVault) : []);
+    const nextVault = createVaultItemFromAction(action);
+    if (!currentVault.some((item) => item.id === nextVault.id)) {
+      localStorage.setItem(STORAGE_KEYS.vault, JSON.stringify([nextVault, ...currentVault]));
+      setSavedIds([nextVault.id, ...currentVault.map((item) => item.id)]);
+    }
   }
 
   const hasTargets = onboardingData ? hasConfiguredTrackedCompanies(onboardingData) : false;
@@ -270,9 +301,71 @@ export default function SignalsPage() {
           </div>
         ) : (
           <div className="space-y-3">
+            {radar?.events && radar.events.length > 0 && (
+              <section className="space-y-3">
+                <h2 className="text-[11px] font-bold uppercase tracking-widest text-slate-400">
+                  Correlated Events
+                </h2>
+                {radar.events.slice(0, 5).map((event: CorrelatedEvent) => {
+                  const action = createActionFromEvent(event);
+                  const savedAction = savedActionIds.includes(action.id);
+
+                  return (
+                    <div key={event.id} className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600">
+                              {event.company}
+                            </span>
+                            {event.changeTypes.map((changeType) => (
+                              <span
+                                key={`${event.id}-${changeType}`}
+                                className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-700"
+                              >
+                                {changeType}
+                              </span>
+                            ))}
+                          </div>
+                          <h3 className="mt-2 font-bold text-slate-900">{event.title}</h3>
+                          <p className="mt-2 text-sm text-slate-700">{event.summary}</p>
+                          <p className="mt-2 text-[11px] text-slate-400">
+                            evidence {event.evidenceCount} · confidence {event.confidence}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xl font-bold text-navy-custom">{event.importance}</p>
+                          <p className="text-[10px] text-slate-400">event</p>
+                        </div>
+                      </div>
+                      <div className="mt-4 flex gap-2">
+                        {event.evidence[0] ? (
+                          <button
+                            onClick={() => window.open(event.evidence[0].link, "_blank", "noopener,noreferrer")}
+                            className="flex-1 rounded-xl bg-slate-900 py-3 text-sm font-semibold text-white"
+                          >
+                            근거 열기
+                          </button>
+                        ) : null}
+                        <button
+                          onClick={() => saveAction(action)}
+                          disabled={savedAction}
+                          className="flex-1 rounded-xl bg-slate-100 py-3 text-sm font-semibold text-slate-700 disabled:opacity-50"
+                        >
+                          {savedAction ? "액션 저장됨" : "액션 추가"}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </section>
+            )}
+
             {filteredSignals.map((signal) => {
               const config = CATEGORY_CONFIG[signal.category];
               const saved = savedIds.includes(`signal-${signal.id}`);
+              const action = createActionFromSignal(signal);
+              const savedAction = savedActionIds.includes(action.id);
 
               return (
                 <div key={signal.id} className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm">
@@ -363,6 +456,13 @@ export default function SignalsPage() {
                       className="flex-1 rounded-xl bg-slate-900 text-white py-3 text-sm font-semibold"
                     >
                       원문 열기
+                    </button>
+                    <button
+                      onClick={() => saveAction(action)}
+                      disabled={savedAction}
+                      className="flex-1 rounded-xl bg-slate-100 py-3 text-sm font-semibold text-slate-700 disabled:opacity-50"
+                    >
+                      {savedAction ? "액션 저장됨" : "액션 추가"}
                     </button>
                     <button
                       onClick={() => saveSignal(signal)}

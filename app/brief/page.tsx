@@ -4,6 +4,12 @@ import { useEffect, useState } from "react";
 
 import BottomNav from "@/components/layout/BottomNav";
 import MobileContainer from "@/components/layout/MobileContainer";
+import {
+  createActionFromBriefAction,
+  createVaultItemFromAction,
+  normalizeActionItems,
+  upsertActionItem,
+} from "@/lib/app/actions";
 import { formatStructuredHighlights, hasStructuredChanges } from "@/lib/app/structured-change";
 import {
   diffTopicBriefs,
@@ -53,6 +59,7 @@ export default function BriefPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [savedActionIds, setSavedActionIds] = useState<string[]>([]);
 
   useEffect(() => {
     const raw = localStorage.getItem(STORAGE_KEYS.onboarding);
@@ -87,6 +94,11 @@ export default function BriefPage() {
         localStorage.removeItem(STORAGE_KEYS.analysisTopic);
         localStorage.removeItem(STORAGE_KEYS.analysisSources);
       }
+    }
+
+    const rawActions = localStorage.getItem(STORAGE_KEYS.actions);
+    if (rawActions) {
+      setSavedActionIds(normalizeActionItems(JSON.parse(rawActions)).map((item) => item.id));
     }
   }, []);
 
@@ -175,6 +187,27 @@ export default function BriefPage() {
 
     localStorage.setItem(STORAGE_KEYS.vault, JSON.stringify([item, ...items]));
     setSaved(true);
+  }
+
+  function saveActionToBoard(action: TopicBriefAnalysis["actions"][number]) {
+    const nextAction = createActionFromBriefAction(topic, action);
+    const currentActions = normalizeActionItems(
+      JSON.parse(localStorage.getItem(STORAGE_KEYS.actions) || "[]")
+    );
+    const nextActions = upsertActionItem(currentActions, nextAction);
+    localStorage.setItem(STORAGE_KEYS.actions, JSON.stringify(nextActions));
+    setSavedActionIds(nextActions.map((item) => item.id));
+
+    const currentVault = normalizeVaultItems(
+      JSON.parse(localStorage.getItem(STORAGE_KEYS.vault) || "[]")
+    );
+    const nextVaultItem = createVaultItemFromAction(nextAction);
+    if (!currentVault.some((item) => item.id === nextVaultItem.id)) {
+      localStorage.setItem(
+        STORAGE_KEYS.vault,
+        JSON.stringify([nextVaultItem, ...currentVault])
+      );
+    }
   }
 
   return (
@@ -405,6 +438,49 @@ export default function BriefPage() {
               </section>
             )}
 
+            {result.analysis.events.length > 0 && (
+              <section className="space-y-3">
+                <h2 className="text-[11px] font-bold uppercase tracking-widest text-slate-400">연결된 이벤트</h2>
+                {result.analysis.events.map((event) => (
+                  <div key={event.id} className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600">
+                            {event.company}
+                          </span>
+                          {event.changeTypes.map((changeType) => (
+                            <span
+                              key={`${event.id}-${changeType}`}
+                              className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-700"
+                            >
+                              {changeType}
+                            </span>
+                          ))}
+                        </div>
+                        <h3 className="mt-2 text-base font-bold text-slate-900">{event.title}</h3>
+                        <p className="mt-2 text-sm text-slate-600">{event.summary}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-lg font-bold text-navy-custom">{event.importance}</p>
+                        <p className="text-[10px] text-slate-400">importance</p>
+                      </div>
+                    </div>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {event.sourceKinds.map((kind) => (
+                        <span
+                          key={`${event.id}-${kind}`}
+                          className="rounded-full bg-emerald-50 px-2 py-1 text-[11px] font-semibold text-emerald-700"
+                        >
+                          {kind}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </section>
+            )}
+
             <section className="space-y-3">
               <h2 className="text-[11px] font-bold uppercase tracking-widest text-slate-400">실행안</h2>
               {result.analysis.actions.map((action) => (
@@ -422,6 +498,17 @@ export default function BriefPage() {
                   </div>
                   <h3 className="mt-2 text-base font-bold text-slate-900">{action.title}</h3>
                   <p className="mt-2 text-sm text-slate-600">{action.rationale}</p>
+                  <div className="mt-4 flex justify-end">
+                    <button
+                      onClick={() => saveActionToBoard(action)}
+                      disabled={savedActionIds.includes(createActionFromBriefAction(topic, action).id)}
+                      className="rounded-xl bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-700 disabled:opacity-50"
+                    >
+                      {savedActionIds.includes(createActionFromBriefAction(topic, action).id)
+                        ? "액션 보드 저장됨"
+                        : "액션 보드로 보내기"}
+                    </button>
+                  </div>
                 </div>
               ))}
             </section>

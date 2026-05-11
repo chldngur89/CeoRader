@@ -1,0 +1,165 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e4]: 9:41
+      - generic [ref=e5]:
+        - generic [ref=e6]: signal_cellular_alt
+        - generic [ref=e7]: wifi
+        - generic [ref=e8]: battery_full
+    - banner [ref=e9]:
+      - generic [ref=e10]:
+        - generic [ref=e11]:
+          - heading "시장 신호" [level=1] [ref=e12]
+          - paragraph [ref=e13]: 공식 사이트를 직접 탐색해 변화만 골라 보여줍니다.
+        - button "새로 스캔" [ref=e60] [cursor=pointer]
+    - generic [ref=e15]:
+      - generic [ref=e37]:
+        - generic [ref=e38]:
+          - paragraph [ref=e39]: "2"
+          - paragraph [ref=e40]: 추적 회사
+        - generic [ref=e41]:
+          - paragraph [ref=e42]: "1"
+          - paragraph [ref=e43]: 변화
+        - generic [ref=e44]:
+          - paragraph [ref=e45]: "0"
+          - paragraph [ref=e46]: 기준선
+        - generic [ref=e47]:
+          - paragraph [ref=e48]: "0"
+          - paragraph [ref=e49]: 에러
+      - generic [ref=e50]:
+        - paragraph [ref=e51]: 9건의 연결 이벤트가 정리됐습니다
+        - paragraph [ref=e52]: "2개 회사를 스캔했고 연결 이벤트 9건 상태입니다. 주요 변화: 제품, 가격, 메시지"
+      - generic [ref=e61]:
+        - generic [ref=e62]:
+          - generic [ref=e63]:
+            - generic [ref=e64]: Vercel
+            - generic [ref=e65]: Agentic Scan
+          - paragraph [ref=e66]: Vercel에서 1건의 변화가 감지됐습니다. 연결 이벤트 9건을 묶었습니다.
+        - generic [ref=e67]:
+          - generic [ref=e68]:
+            - generic [ref=e69]: Fixture Labs
+            - generic [ref=e70]: Agentic Scan
+          - paragraph [ref=e71]: Fixture Labs에서 새 변화는 없었고, 기존 추적 상태를 유지했습니다.
+    - generic [ref=e54]:
+      - button "전체" [ref=e55] [cursor=pointer]
+      - button "기회" [ref=e56] [cursor=pointer]
+      - button "위협" [ref=e57] [cursor=pointer]
+      - button "트렌드" [ref=e58] [cursor=pointer]
+    - main [ref=e19]:
+      - generic [ref=e20]:
+        - generic [ref=e72]:
+          - heading "Correlated Events" [level=2] [ref=e73]
+          - generic [ref=e74]:
+            - generic [ref=e75]:
+              - generic [ref=e76]:
+                - generic [ref=e77]:
+                  - generic [ref=e78]: Vercel
+                  - generic [ref=e79]: product
+                - heading "Vercel 제품/기능 변화" [level=3] [ref=e80]
+                - paragraph [ref=e81]: Vercel product 관련 변화가 감지됐습니다. AI가 인간 고용하는 시대 열렸다…"클로드가 내 상사라면 이상적" - 지디넷코리아. 뉴스 기준으로 확인됐습니다.
+                - paragraph [ref=e82]: evidence 1 · confidence 66
+              - generic [ref=e83]:
+                - paragraph [ref=e84]: "62"
+                - paragraph [ref=e85]: event
+            - generic [ref=e86]:
+              - button "근거 열기" [ref=e87] [cursor=pointer]
+              - button "액션 추가" [ref=e88] [cursor=pointer]
+          - generic [ref=e89]:
+            - generic [ref=e90]:
+              - generic [ref=e91]:
+                - generic [ref=e92]:
+                  - generic [ref=e93]: Vercel
+                  - generic [ref=e94]: product
+                - heading "Vercel 제품/기능 변화" [level=3] [ref=e95]
+                - paragraph [ref=e96]: Vercel product 관련 변화가 감지됐습니다. [Tech Insight]AI에이전트가 쓸 수 없는 소프트웨어의 미래는 없다 - 디지털투데이. 뉴스 기준으로 확인됐습니다.
+                - paragraph [ref=e97]: evidence 1 · confidence 66
+              - generic [ref=e98]:
+                - paragraph [ref=e99]: "62"
+                - paragraph [ref=e100]: event
+            - generic [ref=e101]:
+              - button "근거 열기" [ref=e102] [cursor=pointer]
+              - button "액션 추가" [ref=e103] [cursor=pointer]
+          - generic [ref=e104]:
+            - generic [ref=e105]:
+              - generic [ref=e106]:
+                - generic [ref=e107]:
+                  - generic [ref=e108]: Vercel
+                  - generic [ref=e109]: product
+                - heading "Vercel 제품/기능 변화" [level=3] [ref=e110]
+                - paragraph [ref=e111]: Vercel product 관련 변화가 감지됐습니다. 노션, ‘AI 팀원’ 커스텀 에이전트 공개···생산성 패러다임 전환 - 이뉴스투데이. 뉴스 기준으로 확인됐습니다.
+                - paragraph [ref=e112]: evidence 1 · confidence 66
+              - generic [ref=e113]:
+                - paragraph [ref=e114]: "62"
+                - paragraph [ref=e115]: event
+            - generic [ref=e116]:
+              - button "근거 열기" [ref=e117] [cursor=pointer]
+              - button "액션 추가" [ref=e118] [cursor=pointer]
+          - generic [ref=e119]:
+            - generic [ref=e120]:
+              - generic [ref=e121]:
+                - generic [ref=e122]:
+                  - generic [ref=e123]: Vercel
+                  - generic [ref=e124]: pricing
+                - heading "Vercel 가격 변화 버셀, 하시코프 공동 설립자이자 테라폼 개발자인 미첼 하시모토를 이사회 임원으로 임명 - 뉴스와이어" [level=3] [ref=e125]
+                - paragraph [ref=e126]: Vercel pricing 관련 변화가 감지됐습니다. 버셀, 하시코프 공동 설립자이자 테라폼 개발자인 미첼 하시모토를 이사회 임원으로 임명 - 뉴스와이어. 뉴스 기준으로 확인됐습니다.
+                - paragraph [ref=e127]: evidence 1 · confidence 62
+              - generic [ref=e128]:
+                - paragraph [ref=e129]: "59"
+                - paragraph [ref=e130]: event
+            - generic [ref=e131]:
+              - button "근거 열기" [ref=e132] [cursor=pointer]
+              - button "액션 추가" [ref=e133] [cursor=pointer]
+          - generic [ref=e134]:
+            - generic [ref=e135]:
+              - generic [ref=e136]:
+                - generic [ref=e137]:
+                  - generic [ref=e138]: Vercel
+                  - generic [ref=e139]: product
+                - heading "Vercel 제품/기능 변화" [level=3] [ref=e140]
+                - paragraph [ref=e141]: Vercel product 관련 변화가 감지됐습니다. Vercel Appoints Mitchell Hashimoto, Co-Founder of HashiCorp and Creator of Terraform, to Board of Directors - 뉴스와이어. 뉴스 기준으로 확인됐습니다.
+                - paragraph [ref=e142]: evidence 1 · confidence 66
+              - generic [ref=e143]:
+                - paragraph [ref=e144]: "58"
+                - paragraph [ref=e145]: event
+            - generic [ref=e146]:
+              - button "근거 열기" [ref=e147] [cursor=pointer]
+              - button "액션 추가" [ref=e148] [cursor=pointer]
+        - generic [ref=e149]:
+          - generic [ref=e150]:
+            - generic [ref=e151]:
+              - generic [ref=e152]:
+                - generic [ref=e153]: 위협
+                - generic [ref=e154]: Vercel
+                - generic [ref=e155]: 방금
+              - heading "Vercel Homepage 메시지 변화" [level=3] [ref=e156]
+              - paragraph [ref=e157]: Homepage · homepage
+            - generic [ref=e158]:
+              - paragraph [ref=e159]: "68"
+              - paragraph [ref=e160]: priority
+          - paragraph [ref=e161]: "Vercel: Homepage에서 messaging 관련 변화가 감지됐습니다. 추가 0건, 제거 0건입니다."
+          - generic [ref=e163]: messaging
+          - generic [ref=e164]:
+            - paragraph [ref=e165]: Recommended next step
+            - paragraph [ref=e166]: 메인 카피 변화가 타깃 시장 이동인지 포지셔닝 문구를 함께 검토하세요.
+          - generic [ref=e167]:
+            - button "원문 열기" [ref=e168] [cursor=pointer]
+            - button "액션 추가" [ref=e169] [cursor=pointer]
+            - button "금고 저장" [ref=e170] [cursor=pointer]
+    - navigation [ref=e22]:
+      - link "radar 레이더" [ref=e23] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e24]: radar
+        - generic [ref=e25]: 레이더
+      - link "notifications_active 시장신호" [ref=e26] [cursor=pointer]:
+        - /url: /signals
+        - generic [ref=e27]: notifications_active
+        - generic [ref=e28]: 시장신호
+      - link "folder_special 금고" [ref=e29] [cursor=pointer]:
+        - /url: /vault
+        - generic [ref=e30]: folder_special
+        - generic [ref=e31]: 금고
+      - link "tune 설정" [ref=e32] [cursor=pointer]:
+        - /url: /config
+        - generic [ref=e33]: tune
+        - generic [ref=e34]: 설정
+  - alert [ref=e59]

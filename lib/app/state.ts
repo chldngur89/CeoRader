@@ -21,6 +21,7 @@ export const STORAGE_KEYS = {
   login: "temp_logged_in",
   radarCache: "ceorader_agentic_radar",
   vault: "ceorader_vault",
+  actions: "ceorader_actions",
   analysis: "ceorader_analysis",
   analysisSources: "ceorader_analysis_sources",
   analysisTopic: "ceorader_analysis_topic",

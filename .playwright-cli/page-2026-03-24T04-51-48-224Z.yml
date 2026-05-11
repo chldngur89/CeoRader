@@ -1,0 +1,26 @@
+- generic [ref=e1]:
+  - alert [ref=e25]
+  - generic [ref=e27]:
+    - generic [ref=e28]:
+      - generic [ref=e29]: 9:41
+      - generic [ref=e30]:
+        - generic [ref=e31]: signal_cellular_alt
+        - generic [ref=e32]: wifi
+        - generic [ref=e33]: battery_full
+    - generic [ref=e35]:
+      - button "arrow_back_ios" [ref=e36] [cursor=pointer]:
+        - generic [ref=e37]: arrow_back_ios
+      - generic [ref=e38]: 4 / 5 단계
+    - generic [ref=e41]:
+      - banner [ref=e115]:
+        - heading "관심 있는 회사를 적어둡니다" [level=1] [ref=e116]
+        - paragraph [ref=e117]: 회사 이름만 있어도 뉴스·시장 레이더에는 반영됩니다. 공식 홈페이지 URL까지 적어두면 나중에 agentic search가 가격, 제품, 채용, 뉴스룸을 직접 추적할 수 있습니다.
+      - generic [ref=e119]:
+        - generic [ref=e120]:
+          - paragraph [ref=e121]: 추적 대상 1
+          - button "delete" [ref=e122] [cursor=pointer]:
+            - generic [ref=e123]: delete
+        - textbox "회사명" [active] [ref=e124]: Vercel
+        - textbox "공식 사이트 URL" [ref=e125]: https://vercel.com
+      - button "+ 추적 대상 추가" [ref=e126] [cursor=pointer]
+    - button "계속하기" [ref=e87] [cursor=pointer]

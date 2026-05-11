@@ -4,6 +4,8 @@ import {
   ensureSourceRegistry,
   loadSourceRegistry,
   type ManualTrackedSourceInput,
+  type SourceStateInput,
+  updateSourceRegistry,
 } from "@/lib/agentic/source-registry";
 
 export const runtime = "nodejs";
@@ -27,6 +29,26 @@ function parseManualSources(value: unknown): ManualTrackedSourceInput[] {
         : undefined,
     }))
     .filter((item) => item.url.trim().length > 0);
+}
+
+function parseSourceStates(value: unknown): SourceStateInput[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .filter((item): item is Record<string, unknown> => !!item && typeof item === "object")
+    .map((item) => ({
+      id: typeof item.id === "string" ? item.id : "",
+      isActive: typeof item.isActive === "boolean" ? item.isActive : undefined,
+      priority: typeof item.priority === "number" ? item.priority : undefined,
+      label: typeof item.label === "string" ? item.label : undefined,
+      url: typeof item.url === "string" ? item.url : undefined,
+      tags: Array.isArray(item.tags)
+        ? item.tags.filter((tag): tag is string => typeof tag === "string")
+        : undefined,
+    }))
+    .filter((item) => item.id.trim().length > 0);
 }
 
 export async function GET(req: NextRequest) {
@@ -74,6 +96,42 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         error: "Failed to build tracked source registry",
+        message: error?.message || "Unknown error",
+      },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const company = typeof body.company === "string" ? body.company.trim() : "";
+    const website = typeof body.website === "string" ? body.website.trim() : undefined;
+    const includeDefaults = body.includeDefaults !== false;
+    const manualSources = parseManualSources(body.manualSources);
+    const sourceStates = parseSourceStates(body.sourceStates);
+
+    if (!company) {
+      return NextResponse.json({ error: "Company name required" }, { status: 400 });
+    }
+
+    const registry = await updateSourceRegistry({
+      company,
+      website,
+      includeDefaults,
+      manualSources,
+      sourceStates,
+    });
+
+    return NextResponse.json({
+      success: true,
+      registry,
+    });
+  } catch (error: any) {
+    return NextResponse.json(
+      {
+        error: "Failed to update tracked source registry",
         message: error?.message || "Unknown error",
       },
       { status: 500 }

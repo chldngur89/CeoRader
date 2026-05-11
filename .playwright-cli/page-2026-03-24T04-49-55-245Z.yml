@@ -1,0 +1,27 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e4]: 9:41
+      - generic [ref=e5]:
+        - generic [ref=e6]: signal_cellular_alt
+        - generic [ref=e7]: wifi
+        - generic [ref=e8]: battery_full
+    - generic [ref=e9]:
+      - generic [ref=e11]: radar
+      - heading "CeoRader" [level=1] [ref=e12]
+      - paragraph [ref=e13]:
+        - text: CEO를 위한 agentic market radar
+        - text: 공식 사이트 변화와 경쟁 신호를 먼저 잡아냅니다
+      - generic [ref=e14]:
+        - generic [ref=e15]: 데모 액세스
+        - generic [ref=e16]: 브라우저 로컬 상태로 바로 시작
+      - button "rocket_launch 데모로 시작" [ref=e17] [cursor=pointer]:
+        - generic [ref=e18]: rocket_launch
+        - text: 데모로 시작
+      - generic [ref=e19]:
+        - paragraph [ref=e20]: 현재 모드
+        - generic [ref=e21]:
+          - paragraph [ref=e22]: "공식 사이트 탐색: Playwright"
+          - paragraph [ref=e23]: "상태 저장: 로컬 `.ceorader/agentic`"
+          - paragraph [ref=e24]: "인증: 데모 세션"
+  - alert [ref=e25]

@@ -1,0 +1,328 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e4]: 9:41
+      - generic [ref=e5]:
+        - generic [ref=e6]: signal_cellular_alt
+        - generic [ref=e7]: wifi
+        - generic [ref=e8]: battery_full
+    - banner [ref=e9]:
+      - generic [ref=e10]:
+        - generic [ref=e11]:
+          - heading "런 리뷰" [level=1] [ref=e12]
+          - paragraph [ref=e13]: run 선택, source별 diff, extracted fact, 연결 이벤트를 함께 검토합니다.
+        - button "지금 실행" [ref=e33] [cursor=pointer]
+    - main [ref=e14]:
+      - generic [ref=e34]:
+        - generic [ref=e35]:
+          - paragraph [ref=e36]: "20"
+          - paragraph [ref=e37]: 런 수
+        - generic [ref=e38]:
+          - paragraph [ref=e39]: "3"
+          - paragraph [ref=e40]: 활성 회사
+        - generic [ref=e41]:
+          - paragraph [ref=e42]: "9"
+          - paragraph [ref=e43]: 이벤트
+        - generic [ref=e44]:
+          - paragraph [ref=e45]: "0"
+          - paragraph [ref=e46]: 에러 회사
+      - generic [ref=e47]:
+        - generic [ref=e48]:
+          - paragraph [ref=e49]: Recent Runs
+          - button "Fixture Labs 8분 전 방문 4 · 변화 0 · 초기 0 · 에러 0 0 changed" [ref=e50] [cursor=pointer]:
+            - generic [ref=e51]:
+              - generic [ref=e52]:
+                - generic [ref=e53]:
+                  - heading "Fixture Labs" [level=2] [ref=e54]
+                  - generic [ref=e55]: 8분 전
+                - paragraph [ref=e56]: 방문 4 · 변화 0 · 초기 0 · 에러 0
+              - generic [ref=e57]:
+                - paragraph [ref=e58]: "0"
+                - paragraph [ref=e59]: changed
+          - button "Vercel 8분 전 방문 4 · 변화 0 · 초기 0 · 에러 0 0 changed" [ref=e60] [cursor=pointer]:
+            - generic [ref=e61]:
+              - generic [ref=e62]:
+                - generic [ref=e63]:
+                  - heading "Vercel" [level=2] [ref=e64]
+                  - generic [ref=e65]: 8분 전
+                - paragraph [ref=e66]: 방문 4 · 변화 0 · 초기 0 · 에러 0
+              - generic [ref=e67]:
+                - paragraph [ref=e68]: "0"
+                - paragraph [ref=e69]: changed
+          - button "Vercel 8분 전 방문 4 · 변화 1 · 초기 0 · 에러 0 1 changed" [ref=e70] [cursor=pointer]:
+            - generic [ref=e71]:
+              - generic [ref=e72]:
+                - generic [ref=e73]:
+                  - heading "Vercel" [level=2] [ref=e74]
+                  - generic [ref=e75]: 8분 전
+                - paragraph [ref=e76]: 방문 4 · 변화 1 · 초기 0 · 에러 0
+              - generic [ref=e77]:
+                - paragraph [ref=e78]: "1"
+                - paragraph [ref=e79]: changed
+          - button "Fixture Labs 11분 전 방문 1 · 변화 0 · 초기 0 · 에러 1 0 changed" [ref=e80] [cursor=pointer]:
+            - generic [ref=e81]:
+              - generic [ref=e82]:
+                - generic [ref=e83]:
+                  - heading "Fixture Labs" [level=2] [ref=e84]
+                  - generic [ref=e85]: 11분 전
+                - paragraph [ref=e86]: 방문 1 · 변화 0 · 초기 0 · 에러 1
+              - generic [ref=e87]:
+                - paragraph [ref=e88]: "0"
+                - paragraph [ref=e89]: changed
+          - button "Fixture Labs 11분 전 방문 1 · 변화 0 · 초기 0 · 에러 1 0 changed" [ref=e90] [cursor=pointer]:
+            - generic [ref=e91]:
+              - generic [ref=e92]:
+                - generic [ref=e93]:
+                  - heading "Fixture Labs" [level=2] [ref=e94]
+                  - generic [ref=e95]: 11분 전
+                - paragraph [ref=e96]: 방문 1 · 변화 0 · 초기 0 · 에러 1
+              - generic [ref=e97]:
+                - paragraph [ref=e98]: "0"
+                - paragraph [ref=e99]: changed
+          - button "Vercel 11분 전 방문 2 · 변화 0 · 초기 0 · 에러 0 0 changed" [ref=e100] [cursor=pointer]:
+            - generic [ref=e101]:
+              - generic [ref=e102]:
+                - generic [ref=e103]:
+                  - heading "Vercel" [level=2] [ref=e104]
+                  - generic [ref=e105]: 11분 전
+                - paragraph [ref=e106]: 방문 2 · 변화 0 · 초기 0 · 에러 0
+              - generic [ref=e107]:
+                - paragraph [ref=e108]: "0"
+                - paragraph [ref=e109]: changed
+          - button "Vercel 11분 전 방문 2 · 변화 1 · 초기 0 · 에러 0 1 changed" [ref=e110] [cursor=pointer]:
+            - generic [ref=e111]:
+              - generic [ref=e112]:
+                - generic [ref=e113]:
+                  - heading "Vercel" [level=2] [ref=e114]
+                  - generic [ref=e115]: 11분 전
+                - paragraph [ref=e116]: 방문 2 · 변화 1 · 초기 0 · 에러 0
+              - generic [ref=e117]:
+                - paragraph [ref=e118]: "1"
+                - paragraph [ref=e119]: changed
+          - button "Vercel 23분 전 방문 4 · 변화 1 · 초기 0 · 에러 0 1 changed" [ref=e120] [cursor=pointer]:
+            - generic [ref=e121]:
+              - generic [ref=e122]:
+                - generic [ref=e123]:
+                  - heading "Vercel" [level=2] [ref=e124]
+                  - generic [ref=e125]: 23분 전
+                - paragraph [ref=e126]: 방문 4 · 변화 1 · 초기 0 · 에러 0
+              - generic [ref=e127]:
+                - paragraph [ref=e128]: "1"
+                - paragraph [ref=e129]: changed
+          - button "Vercel 23분 전 방문 4 · 변화 2 · 초기 0 · 에러 0 2 changed" [ref=e130] [cursor=pointer]:
+            - generic [ref=e131]:
+              - generic [ref=e132]:
+                - generic [ref=e133]:
+                  - heading "Vercel" [level=2] [ref=e134]
+                  - generic [ref=e135]: 23분 전
+                - paragraph [ref=e136]: 방문 4 · 변화 2 · 초기 0 · 에러 0
+              - generic [ref=e137]:
+                - paragraph [ref=e138]: "2"
+                - paragraph [ref=e139]: changed
+          - button "Vercel 23분 전 방문 3 · 변화 0 · 초기 0 · 에러 0 0 changed" [ref=e140] [cursor=pointer]:
+            - generic [ref=e141]:
+              - generic [ref=e142]:
+                - generic [ref=e143]:
+                  - heading "Vercel" [level=2] [ref=e144]
+                  - generic [ref=e145]: 23분 전
+                - paragraph [ref=e146]: 방문 3 · 변화 0 · 초기 0 · 에러 0
+              - generic [ref=e147]:
+                - paragraph [ref=e148]: "0"
+                - paragraph [ref=e149]: changed
+          - button "Fixture Labs 3월 16일 방문 4 · 변화 0 · 초기 0 · 에러 0 0 changed" [ref=e150] [cursor=pointer]:
+            - generic [ref=e151]:
+              - generic [ref=e152]:
+                - generic [ref=e153]:
+                  - heading "Fixture Labs" [level=2] [ref=e154]
+                  - generic [ref=e155]: 3월 16일
+                - paragraph [ref=e156]: 방문 4 · 변화 0 · 초기 0 · 에러 0
+              - generic [ref=e157]:
+                - paragraph [ref=e158]: "0"
+                - paragraph [ref=e159]: changed
+          - button "Fixture Labs 3월 16일 방문 4 · 변화 0 · 초기 0 · 에러 0 0 changed" [ref=e160] [cursor=pointer]:
+            - generic [ref=e161]:
+              - generic [ref=e162]:
+                - generic [ref=e163]:
+                  - heading "Fixture Labs" [level=2] [ref=e164]
+                  - generic [ref=e165]: 3월 16일
+                - paragraph [ref=e166]: 방문 4 · 변화 0 · 초기 0 · 에러 0
+              - generic [ref=e167]:
+                - paragraph [ref=e168]: "0"
+                - paragraph [ref=e169]: changed
+          - button "Fixture Labs 3월 16일 방문 4 · 변화 0 · 초기 0 · 에러 0 0 changed" [ref=e170] [cursor=pointer]:
+            - generic [ref=e171]:
+              - generic [ref=e172]:
+                - generic [ref=e173]:
+                  - heading "Fixture Labs" [level=2] [ref=e174]
+                  - generic [ref=e175]: 3월 16일
+                - paragraph [ref=e176]: 방문 4 · 변화 0 · 초기 0 · 에러 0
+              - generic [ref=e177]:
+                - paragraph [ref=e178]: "0"
+                - paragraph [ref=e179]: changed
+          - button "Vercel 3월 16일 방문 4 · 변화 0 · 초기 0 · 에러 0 0 changed" [ref=e180] [cursor=pointer]:
+            - generic [ref=e181]:
+              - generic [ref=e182]:
+                - generic [ref=e183]:
+                  - heading "Vercel" [level=2] [ref=e184]
+                  - generic [ref=e185]: 3월 16일
+                - paragraph [ref=e186]: 방문 4 · 변화 0 · 초기 0 · 에러 0
+              - generic [ref=e187]:
+                - paragraph [ref=e188]: "0"
+                - paragraph [ref=e189]: changed
+          - button "Fixture Labs 3월 16일 방문 3 · 변화 0 · 초기 0 · 에러 0 0 changed" [ref=e190] [cursor=pointer]:
+            - generic [ref=e191]:
+              - generic [ref=e192]:
+                - generic [ref=e193]:
+                  - heading "Fixture Labs" [level=2] [ref=e194]
+                  - generic [ref=e195]: 3월 16일
+                - paragraph [ref=e196]: 방문 3 · 변화 0 · 초기 0 · 에러 0
+              - generic [ref=e197]:
+                - paragraph [ref=e198]: "0"
+                - paragraph [ref=e199]: changed
+          - button "Vercel 3월 16일 방문 3 · 변화 1 · 초기 0 · 에러 0 1 changed" [ref=e200] [cursor=pointer]:
+            - generic [ref=e201]:
+              - generic [ref=e202]:
+                - generic [ref=e203]:
+                  - heading "Vercel" [level=2] [ref=e204]
+                  - generic [ref=e205]: 3월 16일
+                - paragraph [ref=e206]: 방문 3 · 변화 1 · 초기 0 · 에러 0
+              - generic [ref=e207]:
+                - paragraph [ref=e208]: "1"
+                - paragraph [ref=e209]: changed
+          - button "Fixture Labs 3월 16일 방문 4 · 변화 0 · 초기 0 · 에러 0 0 changed" [ref=e210] [cursor=pointer]:
+            - generic [ref=e211]:
+              - generic [ref=e212]:
+                - generic [ref=e213]:
+                  - heading "Fixture Labs" [level=2] [ref=e214]
+                  - generic [ref=e215]: 3월 16일
+                - paragraph [ref=e216]: 방문 4 · 변화 0 · 초기 0 · 에러 0
+              - generic [ref=e217]:
+                - paragraph [ref=e218]: "0"
+                - paragraph [ref=e219]: changed
+          - button "Fixture Labs 3월 16일 방문 3 · 변화 0 · 초기 0 · 에러 0 0 changed" [ref=e220] [cursor=pointer]:
+            - generic [ref=e221]:
+              - generic [ref=e222]:
+                - generic [ref=e223]:
+                  - heading "Fixture Labs" [level=2] [ref=e224]
+                  - generic [ref=e225]: 3월 16일
+                - paragraph [ref=e226]: 방문 3 · 변화 0 · 초기 0 · 에러 0
+              - generic [ref=e227]:
+                - paragraph [ref=e228]: "0"
+                - paragraph [ref=e229]: changed
+          - button "Fixture Labs 3월 16일 방문 4 · 변화 0 · 초기 0 · 에러 0 0 changed" [ref=e230] [cursor=pointer]:
+            - generic [ref=e231]:
+              - generic [ref=e232]:
+                - generic [ref=e233]:
+                  - heading "Fixture Labs" [level=2] [ref=e234]
+                  - generic [ref=e235]: 3월 16일
+                - paragraph [ref=e236]: 방문 4 · 변화 0 · 초기 0 · 에러 0
+              - generic [ref=e237]:
+                - paragraph [ref=e238]: "0"
+                - paragraph [ref=e239]: changed
+          - button "Fixture Labs 3월 16일 방문 4 · 변화 0 · 초기 1 · 에러 0 0 changed" [ref=e240] [cursor=pointer]:
+            - generic [ref=e241]:
+              - generic [ref=e242]:
+                - generic [ref=e243]:
+                  - heading "Fixture Labs" [level=2] [ref=e244]
+                  - generic [ref=e245]: 3월 16일
+                - paragraph [ref=e246]: 방문 4 · 변화 0 · 초기 1 · 에러 0
+              - generic [ref=e247]:
+                - paragraph [ref=e248]: "0"
+                - paragraph [ref=e249]: changed
+        - generic [ref=e251]:
+          - generic [ref=e252]:
+            - generic [ref=e253]:
+              - paragraph [ref=e254]: Selected Run
+              - heading "Fixture Labs" [level=2] [ref=e255]
+              - paragraph [ref=e256]: 2026. 3. 24. 오후 2:07:12 · runId fixture-labs-1774328825810
+            - generic [ref=e257]:
+              - generic [ref=e258]:
+                - paragraph [ref=e259]: "4"
+                - paragraph [ref=e260]: 방문
+              - generic [ref=e261]:
+                - paragraph [ref=e262]: "0"
+                - paragraph [ref=e263]: 변화
+              - generic [ref=e264]:
+                - paragraph [ref=e265]: "0"
+                - paragraph [ref=e266]: 초기
+              - generic [ref=e267]:
+                - paragraph [ref=e268]: "0"
+                - paragraph [ref=e269]: 에러
+          - generic [ref=e270]:
+            - paragraph [ref=e271]: Source Diff Review
+            - generic [ref=e272]:
+              - generic [ref=e273]:
+                - generic [ref=e274]:
+                  - generic [ref=e275]:
+                    - generic [ref=e276]:
+                      - paragraph [ref=e277]:
+                        - text: Homepage
+                        - generic [ref=e278]: · homepage
+                      - generic [ref=e279]: unchanged
+                    - paragraph [ref=e280]: Homepage에서 의미 있는 텍스트 변화가 감지되지 않았습니다.
+                  - link "원문" [ref=e281] [cursor=pointer]:
+                    - /url: http://127.0.0.1:3000/test/agentic-fixture
+                - paragraph [ref=e282]: 시도한 URL 1개 · 이전 11분 전 · 현재 8분 전
+              - generic [ref=e283]:
+                - generic [ref=e284]:
+                  - generic [ref=e285]:
+                    - generic [ref=e286]:
+                      - paragraph [ref=e287]:
+                        - text: Pricing
+                        - generic [ref=e288]: · pricing
+                      - generic [ref=e289]: unchanged
+                    - paragraph [ref=e290]: Pricing에서 의미 있는 텍스트 변화가 감지되지 않았습니다.
+                  - link "원문" [ref=e291] [cursor=pointer]:
+                    - /url: http://localhost:3000/login
+                - paragraph [ref=e292]: 시도한 URL 1개 · 이전 3월 16일 · 현재 8분 전
+              - generic [ref=e293]:
+                - generic [ref=e294]:
+                  - generic [ref=e295]:
+                    - generic [ref=e296]:
+                      - paragraph [ref=e297]:
+                        - text: Product
+                        - generic [ref=e298]: · product
+                      - generic [ref=e299]: unchanged
+                    - paragraph [ref=e300]: Product에서 의미 있는 텍스트 변화가 감지되지 않았습니다.
+                  - link "원문" [ref=e301] [cursor=pointer]:
+                    - /url: http://localhost:3000/login
+                - paragraph [ref=e302]: 시도한 URL 1개 · 이전 3월 16일 · 현재 8분 전
+              - generic [ref=e303]:
+                - generic [ref=e304]:
+                  - generic [ref=e305]:
+                    - generic [ref=e306]:
+                      - paragraph [ref=e307]:
+                        - text: Blog
+                        - generic [ref=e308]: · blog
+                      - generic [ref=e309]: unchanged
+                    - paragraph [ref=e310]: Blog에서 의미 있는 텍스트 변화가 감지되지 않았습니다.
+                  - link "원문" [ref=e311] [cursor=pointer]:
+                    - /url: http://localhost:3000/login
+                - paragraph [ref=e312]: 시도한 URL 1개 · 이전 3월 16일 · 현재 8분 전
+      - generic [ref=e313]:
+        - link "시장 신호 최신 event와 signal 근거를 봅니다." [ref=e314] [cursor=pointer]:
+          - /url: /signals
+          - paragraph [ref=e315]: 시장 신호
+          - paragraph [ref=e316]: 최신 event와 signal 근거를 봅니다.
+        - link "레이더 건강도 커버리지와 에러 소스를 점검합니다." [ref=e317] [cursor=pointer]:
+          - /url: /evaluation
+          - paragraph [ref=e318]: 레이더 건강도
+          - paragraph [ref=e319]: 커버리지와 에러 소스를 점검합니다.
+    - navigation [ref=e19]:
+      - link "radar 레이더" [ref=e20] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e21]: radar
+        - generic [ref=e22]: 레이더
+      - link "notifications_active 시장신호" [ref=e23] [cursor=pointer]:
+        - /url: /signals
+        - generic [ref=e24]: notifications_active
+        - generic [ref=e25]: 시장신호
+      - link "folder_special 금고" [ref=e26] [cursor=pointer]:
+        - /url: /vault
+        - generic [ref=e27]: folder_special
+        - generic [ref=e28]: 금고
+      - link "tune 설정" [ref=e29] [cursor=pointer]:
+        - /url: /config
+        - generic [ref=e30]: tune
+        - generic [ref=e31]: 설정
+  - alert [ref=e320]

@@ -1,5 +1,17 @@
 import { runAgenticScan, type AgenticScanResult } from "@/lib/agentic/scan";
+import {
+  buildEventEvidenceMap,
+  buildNewsFacts,
+  buildSiteFacts,
+  correlateFacts,
+  scoreSignalImportance,
+  type CorrelatedEvent,
+} from "@/lib/app/intelligence";
 import type { StructuredChangeSet } from "@/lib/app/structured-change";
+import {
+  radarSearch,
+  type RadarSearchDocument,
+} from "@/lib/search/radar-search";
 
 type RadarContext = {
   companyName?: string;
@@ -42,6 +54,7 @@ export interface AgenticRadarCompanyResult {
   scan?: AgenticScanResult;
   error?: string;
   signals: AgenticRadarSignal[];
+  events: CorrelatedEvent[];
 }
 
 export interface AgenticRadarOverview {
@@ -60,6 +73,7 @@ export interface AgenticRadarResponse {
   overview: AgenticRadarOverview;
   companyResults: AgenticRadarCompanyResult[];
   signals: AgenticRadarSignal[];
+  events: CorrelatedEvent[];
   timestamp: string;
 }
 
@@ -69,8 +83,29 @@ function normalizeUrl(value: string) {
   return /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
 }
 
+function normalizeText(text: string) {
+  return text.replace(/\s+/g, " ").trim();
+}
+
+function normalizeKey(text: string) {
+  return normalizeText(text).toLowerCase();
+}
+
 function uniqueStrings(values: string[]) {
   return Array.from(new Set(values.filter(Boolean)));
+}
+
+function dedupeDocuments(documents: RadarSearchDocument[]) {
+  const seen = new Set<string>();
+
+  return documents.filter((document) => {
+    const key = `${normalizeKey(document.title)}|${normalizeKey(document.source)}`;
+    if (seen.has(key)) {
+      return false;
+    }
+    seen.add(key);
+    return true;
+  });
 }
 
 function changeTypeLabel(changeType: string) {
@@ -131,33 +166,19 @@ function pickCategory(changeTypes: string[], isOwnCompany: boolean) {
   return "trend" as const;
 }
 
-function computeImportance(
-  changeTypes: string[],
-  added: string[],
-  sourceType: string,
-  status: "initial" | "changed",
-  keywords: string[]
-) {
-  let score = status === "changed" ? 72 : 58;
-  const normalizedAdded = added.join(" ").toLowerCase();
+function signalConfidence(signal: Pick<AgenticRadarSignal, "structured" | "added" | "removed" | "changeTypes">) {
+  let confidence = 60;
 
-  if (sourceType === "pricing") score += 8;
-  if (sourceType === "product") score += 6;
-  if (sourceType === "homepage") score += 4;
+  if (signal.structured?.pricing.length) confidence += 12;
+  if (signal.structured?.messaging.length) confidence += 8;
+  if (signal.structured?.hiring.length) confidence += 8;
+  if (signal.structured?.partnership.length) confidence += 8;
+  if (signal.added.length > 0) confidence += 5;
+  if (signal.removed.length > 0) confidence += 3;
+  if (signal.changeTypes.includes("pricing")) confidence += 4;
+  if (signal.changeTypes.includes("product")) confidence += 4;
 
-  if (changeTypes.includes("pricing")) score += 12;
-  if (changeTypes.includes("product")) score += 10;
-  if (changeTypes.includes("partnership")) score += 9;
-  if (changeTypes.includes("hiring")) score += 6;
-  if (changeTypes.includes("messaging")) score += 6;
-
-  for (const keyword of keywords) {
-    if (keyword && normalizedAdded.includes(keyword.toLowerCase())) {
-      score += 4;
-    }
-  }
-
-  return Math.max(1, Math.min(99, score));
+  return Math.max(1, Math.min(95, confidence));
 }
 
 function buildSignalTitle(
@@ -207,9 +228,9 @@ function relativeTime(time: string) {
   return date.toLocaleDateString("ko-KR", { month: "short", day: "numeric" });
 }
 
-function companySummary(result: AgenticScanResult) {
+function companySummary(result: AgenticScanResult, events: CorrelatedEvent[]) {
   if (result.summary.changed > 0) {
-    return `${result.company}에서 ${result.summary.changed}건의 변화가 감지됐습니다.`;
+    return `${result.company}에서 ${result.summary.changed}건의 변화가 감지됐습니다.${events.length > 0 ? ` 연결 이벤트 ${events.length}건을 묶었습니다.` : ""}`;
   }
 
   if (result.summary.initial > 0) {
@@ -223,6 +244,17 @@ function companySummary(result: AgenticScanResult) {
   return `${result.company}에서 새 변화는 없었고, 기존 추적 상태를 유지했습니다.`;
 }
 
+function fetchCompanyNews(company: string, context: RadarContext) {
+  return radarSearch({
+    target: company,
+    keywords: context.keywords ?? [],
+    maxDocuments: 10,
+    maxAgeDays: 30,
+    queryLimit: 10,
+    intents: ["product", "pricing", "partnership", "hiring", "marketing", "expansion"],
+  });
+}
+
 function companySignals(
   company: TrackedCompanyInput,
   result: AgenticScanResult,
@@ -230,7 +262,6 @@ function companySignals(
 ) {
   const isOwnCompany =
     context.companyName?.trim().toLowerCase() === company.name.trim().toLowerCase();
-  const keywords = context.keywords ?? [];
 
   return result.results
     .filter((item) => item.fetch.status === "success" && item.diff && item.diff.status !== "unchanged")
@@ -242,18 +273,12 @@ function companySignals(
         )
       );
 
-      return {
+      const signal = {
         id: `${company.name}-${item.source.id}-${index}`,
         company: company.name,
         title: buildSignalTitle(company.name, item.source.label, changeTypes, status),
         category: pickCategory(changeTypes, isOwnCompany),
-        importance: computeImportance(
-          changeTypes,
-          item.diff?.added || [],
-          item.source.type,
-          status,
-          keywords
-        ),
+        importance: 0,
         time: relativeTime(item.fetch.fetchedAt),
         description: buildSignalDescription(
           company.name,
@@ -271,36 +296,101 @@ function companySignals(
         status,
         structured: item.diff?.structured,
       } satisfies AgenticRadarSignal;
+
+      return {
+        ...signal,
+        importance: scoreSignalImportance({
+          sourceType: signal.sourceType,
+          sourceKind: "site-change",
+          changeTypes,
+          status,
+          text: `${signal.title} ${signal.description} ${signal.added.join(" ")}`,
+          keywords: context.keywords,
+          goals: context.goals,
+          evidenceCount: Math.max(1, signal.added.length + signal.removed.length),
+          confidence: signalConfidence(signal),
+        }),
+      };
     })
     .sort((a, b) => b.importance - a.importance);
 }
 
+function companyEvents(
+  company: TrackedCompanyInput,
+  signals: AgenticRadarSignal[],
+  newsDocuments: RadarSearchDocument[],
+  context: RadarContext
+) {
+  const siteEvidence = signals.map((signal) => ({
+    id: signal.id,
+    company: signal.company,
+    sourceType: signal.sourceType,
+    title: signal.title,
+    summary: signal.description,
+    source: signal.source,
+    link: signal.link,
+    pubDate: new Date().toISOString(),
+    changeTypes: signal.changeTypes,
+    structured: signal.structured,
+    added: signal.added,
+    removed: signal.removed,
+  }));
+
+  const newsEvidence = newsDocuments.map((document) => ({
+    id: document.id,
+    company: company.name,
+    title: document.title,
+    summary: document.snippet,
+    source: document.source,
+    link: document.link,
+    pubDate: document.pubDate,
+    intent: document.intent,
+  }));
+
+  const evidenceById = buildEventEvidenceMap(newsEvidence, siteEvidence);
+  const siteFacts = siteEvidence.flatMap((item) => buildSiteFacts(item));
+  const newsFacts = newsEvidence.flatMap((item) => buildNewsFacts(item));
+
+  return correlateFacts({
+    company: company.name,
+    facts: [...siteFacts, ...newsFacts],
+    evidenceById,
+    keywords: context.keywords,
+    goals: context.goals,
+  });
+}
+
 function buildOverview(
   companyResults: AgenticRadarCompanyResult[],
-  signals: AgenticRadarSignal[]
+  signals: AgenticRadarSignal[],
+  events: CorrelatedEvent[]
 ): AgenticRadarOverview {
   const scannedCompanies = companyResults.filter((item) => item.status === "ok").length;
   const errors = companyResults.filter((item) => item.status === "error").length;
   const changedSignals = signals.filter((item) => item.status === "changed").length;
   const initialSignals = signals.filter((item) => item.status === "initial").length;
-  const changeTypes = uniqueStrings(signals.flatMap((item) => item.changeTypes));
-  const actions = uniqueStrings(signals.map((item) => item.recommendation)).slice(0, 3);
+  const changeTypes = uniqueStrings(events.flatMap((item) => item.changeTypes));
+  const actions = uniqueStrings(
+    [...events.map((item) => item.recommendedAction || ""), ...signals.map((item) => item.recommendation)].filter(Boolean)
+  ).slice(0, 3);
 
   const headline =
-    changedSignals > 0
-      ? `${changedSignals}건의 의미 있는 변화가 감지됐습니다`
-      : initialSignals > 0
-        ? `${initialSignals}개 소스의 기준선을 확보했습니다`
-        : scannedCompanies > 0
-          ? "새로운 변화는 없지만 추적은 정상 동작 중입니다"
-          : "추적할 웹사이트를 설정해야 합니다";
+    events.length > 0
+      ? `${events.length}건의 연결 이벤트가 정리됐습니다`
+      : changedSignals > 0
+        ? `${changedSignals}건의 의미 있는 변화가 감지됐습니다`
+        : initialSignals > 0
+          ? `${initialSignals}개 소스의 기준선을 확보했습니다`
+          : scannedCompanies > 0
+            ? "새로운 변화는 없지만 추적은 정상 동작 중입니다"
+            : "추적할 웹사이트를 설정해야 합니다";
 
   const summary =
     scannedCompanies > 0
       ? `${scannedCompanies}개 회사를 스캔했고 ${
-          changedSignals > 0 ? `변화 ${changedSignals}건` : `변화 없음`
+          events.length > 0 ? `연결 이벤트 ${events.length}건` : changedSignals > 0 ? `변화 ${changedSignals}건` : `변화 없음`
         } 상태입니다.${changeTypes.length > 0 ? ` 주요 변화: ${changeTypes.map(changeTypeLabel).join(", ")}` : ""}`
-      : "회사 웹사이트와 추적 대상을 설정하면 agentic search가 공식 사이트를 탐색합니다.";
+      : "회사 웹사이트와 추적 대상을 설정하면 agentic search가 공식 사이트와 뉴스를 함께 탐색합니다.";
 
   return {
     headline,
@@ -332,25 +422,34 @@ export async function runAgenticRadar(params: {
 
   const companyResults: AgenticRadarCompanyResult[] = [];
   const allSignals: AgenticRadarSignal[] = [];
+  const allEvents: CorrelatedEvent[] = [];
 
   for (const company of trackedCompanies) {
     try {
-      const scan = await runAgenticScan({
-        company: company.name,
-        website: company.website,
-        sourceLimit: params.sourceLimit ?? 4,
-      });
+      const [scan, newsSearch] = await Promise.all([
+        runAgenticScan({
+          company: company.name,
+          website: company.website,
+          sourceLimit: params.sourceLimit ?? 4,
+        }),
+        fetchCompanyNews(company.name, params.context ?? {}),
+      ]);
+
       const signals = companySignals(company, scan, params.context ?? {});
+      const newsDocuments = dedupeDocuments(newsSearch.documents).slice(0, 8);
+      const events = companyEvents(company, signals, newsDocuments, params.context ?? {});
 
       companyResults.push({
         company: company.name,
         website: company.website,
-        summary: companySummary(scan),
+        summary: companySummary(scan, events),
         status: "ok",
         scan,
         signals,
+        events,
       });
       allSignals.push(...signals);
+      allEvents.push(...events);
     } catch (error: any) {
       companyResults.push({
         company: company.name,
@@ -359,21 +458,22 @@ export async function runAgenticRadar(params: {
         status: "error",
         error: error?.message || "Unknown error",
         signals: [],
+        events: [],
       });
     }
   }
 
-  const overview = buildOverview(
-    companyResults,
-    allSignals.sort((a, b) => b.importance - a.importance)
-  );
+  const rankedSignals = allSignals.sort((a, b) => b.importance - a.importance).slice(0, 24);
+  const rankedEvents = allEvents.sort((a, b) => b.importance - a.importance).slice(0, 18);
+  const overview = buildOverview(companyResults, rankedSignals, rankedEvents);
 
   return {
     success: true,
     engine: "agentic-radar",
     overview,
     companyResults,
-    signals: allSignals.sort((a, b) => b.importance - a.importance).slice(0, 24),
+    signals: rankedSignals,
+    events: rankedEvents,
     timestamp: new Date().toISOString(),
   };
 }

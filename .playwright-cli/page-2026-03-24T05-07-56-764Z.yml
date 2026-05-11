@@ -1,0 +1,99 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e4]: 9:41
+      - generic [ref=e5]:
+        - generic [ref=e6]: signal_cellular_alt
+        - generic [ref=e7]: wifi
+        - generic [ref=e8]: battery_full
+    - banner [ref=e9]:
+      - heading "액션 보드" [level=1] [ref=e10]
+      - paragraph [ref=e11]: 브리프와 신호에서 만든 실행 항목을 개인 보드에서 관리합니다.
+    - main [ref=e12]:
+      - generic [ref=e13]:
+        - generic [ref=e14]:
+          - paragraph [ref=e15]: "1"
+          - paragraph [ref=e16]: 전체
+        - generic [ref=e17]:
+          - paragraph [ref=e18]: "1"
+          - paragraph [ref=e19]: Todo
+        - generic [ref=e20]:
+          - paragraph [ref=e21]: "0"
+          - paragraph [ref=e22]: Doing
+        - generic [ref=e23]:
+          - paragraph [ref=e24]: "0"
+          - paragraph [ref=e25]: Done
+      - generic [ref=e26]:
+        - paragraph [ref=e27]: Personal Workflow
+        - heading "1개가 아직 실행 대기 중입니다" [level=2] [ref=e75]
+        - paragraph [ref=e29]: "액션은 `/brief`의 실행안과 `/signals`의 이벤트/신호에서 생성됩니다. 현재 금고 항목 1개가 저장되어 있습니다."
+        - generic [ref=e30]:
+          - link "브리프 열기" [ref=e31] [cursor=pointer]:
+            - /url: /brief
+          - link "신호 열기" [ref=e32] [cursor=pointer]:
+            - /url: /signals
+      - generic [ref=e33]:
+        - generic [ref=e34]:
+          - button "all" [ref=e35] [cursor=pointer]
+          - button "CEO" [ref=e36] [cursor=pointer]
+          - button "Product" [ref=e37] [cursor=pointer]
+          - button "Sales" [ref=e38] [cursor=pointer]
+          - button "Ops" [ref=e39] [cursor=pointer]
+        - generic [ref=e40]:
+          - button "all" [ref=e41] [cursor=pointer]
+          - button "high" [ref=e42] [cursor=pointer]
+          - button "medium" [ref=e43] [cursor=pointer]
+          - button "low" [ref=e44] [cursor=pointer]
+      - generic [ref=e45]:
+        - generic [ref=e46]:
+          - generic [ref=e47]:
+            - heading "Todo" [level=2] [ref=e48]
+            - generic [ref=e49]: "1"
+          - generic [ref=e76]:
+            - generic [ref=e77]:
+              - generic [ref=e78]:
+                - generic [ref=e79]:
+                  - generic [ref=e80]: medium
+                  - generic [ref=e81]: Product
+                  - generic [ref=e82]: 90d
+                  - generic [ref=e83]: event
+                - heading "제품 차별점과 출시 속도 차이를 이번 주 세일즈/제품 우선순위에 반영하세요." [level=3] [ref=e84]
+                - paragraph [ref=e85]: Vercel product 관련 변화가 감지됐습니다. AI가 인간 고용하는 시대 열렸다…"클로드가 내 상사라면 이상적" - 지디넷코리아. 뉴스 기준으로 확인됐습니다.
+                - generic [ref=e86]:
+                  - generic [ref=e87]: Vercel
+                  - generic [ref=e88]: product
+              - generic [ref=e89]:
+                - paragraph [ref=e90]: Vercel
+                - paragraph [ref=e91]: 2026. 3. 24.
+            - generic [ref=e92]:
+              - button "Doing로 이동" [ref=e93] [cursor=pointer]
+              - button "Done로 이동" [ref=e94] [cursor=pointer]
+              - button "근거 열기" [ref=e95] [cursor=pointer]
+        - generic [ref=e51]:
+          - generic [ref=e52]:
+            - heading "Doing" [level=2] [ref=e53]
+            - generic [ref=e54]: "0"
+          - generic [ref=e55]: 이 상태의 액션이 없습니다.
+        - generic [ref=e56]:
+          - generic [ref=e57]:
+            - heading "Done" [level=2] [ref=e58]
+            - generic [ref=e59]: "0"
+          - generic [ref=e60]: 이 상태의 액션이 없습니다.
+    - navigation [ref=e61]:
+      - link "radar 레이더" [ref=e62] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e63]: radar
+        - generic [ref=e64]: 레이더
+      - link "notifications_active 시장신호" [ref=e65] [cursor=pointer]:
+        - /url: /signals
+        - generic [ref=e66]: notifications_active
+        - generic [ref=e67]: 시장신호
+      - link "folder_special 금고" [ref=e68] [cursor=pointer]:
+        - /url: /vault
+        - generic [ref=e69]: folder_special
+        - generic [ref=e70]: 금고
+      - link "tune 설정" [ref=e71] [cursor=pointer]:
+        - /url: /config
+        - generic [ref=e72]: tune
+        - generic [ref=e73]: 설정
+  - alert [ref=e96]

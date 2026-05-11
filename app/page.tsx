@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 
 import ActionStepCard from "@/components/dashboard/ActionStepCard";
 import InsightSection from "@/components/dashboard/InsightSection";
-import TopicCard from "@/components/dashboard/TopicCard";
+import TopicCard, { type TopicData } from "@/components/dashboard/TopicCard";
 import BottomNav from "@/components/layout/BottomNav";
 import MobileContainer from "@/components/layout/MobileContainer";
 import {
@@ -32,6 +32,17 @@ export default function Home() {
   const [onboardingData, setOnboardingData] = useState<OnboardingData | null>(null);
   const [radar, setRadar] = useState<RadarResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [briefAnalysis, setBriefAnalysis] = useState<any | null>(null);
+  const [briefSources, setBriefSources] = useState<
+    | Array<{
+        title: string;
+        link: string;
+        source: string;
+        pubDate: string;
+      }>
+    | null
+  >(null);
+  const [briefError, setBriefError] = useState<string | null>(null);
 
   useEffect(() => {
     const loggedIn = localStorage.getItem(STORAGE_KEYS.login);
@@ -63,20 +74,21 @@ export default function Home() {
 
         if (cached.trackedCompaniesSignature === signature && cacheAge < CACHE_TTL_MS) {
           setRadar(cached);
-          setLoading(false);
-          return;
         }
       } catch {
         localStorage.removeItem(STORAGE_KEYS.radarCache);
       }
     }
 
+    // agentic 레이더는 Playwright 등으로 수 분 걸릴 수 있음 — 전체 화면 스피너로 막지 않음
+    setLoading(false);
     if (hasConfiguredTrackedCompanies(parsed)) {
       void runScan(parsed);
-      return;
     }
 
-    setLoading(false);
+    if (!briefAnalysis) {
+      void runBrief(parsed);
+    }
   }, [router]);
 
   async function runScan(data = onboardingData) {
@@ -86,9 +98,14 @@ export default function Home() {
       return;
     }
 
+    let scanTimer: ReturnType<typeof setTimeout> | undefined;
     try {
       setScanning(true);
       setError(null);
+
+      const controller = new AbortController();
+      const scanBudgetMs = 120_000;
+      scanTimer = setTimeout(() => controller.abort(), scanBudgetMs);
 
       const response = await fetch("/api/agentic/radar", {
         method: "POST",
@@ -102,6 +119,7 @@ export default function Home() {
           trackedCompanies: data.trackedCompanies,
           sourceLimit: 4,
         }),
+        signal: controller.signal,
       });
 
       const payload = await response.json();
@@ -118,10 +136,44 @@ export default function Home() {
       };
       localStorage.setItem(STORAGE_KEYS.radarCache, JSON.stringify(cached));
     } catch (scanError: any) {
-      setError(scanError.message || "레이더 스캔에 실패했습니다.");
+      const msg = scanError?.name === "AbortError" ? "레이더 스캔 제한 시간(2분) 초과입니다." : scanError?.message;
+      setError(msg || "레이더 스캔에 실패했습니다.");
     } finally {
+      if (scanTimer) clearTimeout(scanTimer);
       setScanning(false);
       setLoading(false);
+    }
+  }
+
+  async function runBrief(data = onboardingData) {
+    if (!data) return;
+
+    try {
+      setBriefError(null);
+      const topic = data.keywords[0] || data.companyName || "AI";
+      const response = await fetch("/api/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          topic,
+          description: data.description,
+          keywords: data.keywords,
+          companyName: data.companyName,
+          companyWebsite: data.companyWebsite,
+          trackedCompanies: data.trackedCompanies,
+          sourceLimit: 3,
+        }),
+      });
+
+      const payload = await response.json();
+      if (!response.ok) {
+        throw new Error(payload.message || payload.error || "핫 토픽 분석에 실패했습니다.");
+      }
+
+      setBriefAnalysis(payload.analysis);
+      setBriefSources(payload.sources || null);
+    } catch (briefErr: any) {
+      setBriefError(briefErr.message || "핫 토픽 분석에 실패했습니다.");
     }
   }
 
@@ -140,7 +192,7 @@ export default function Home() {
   }
 
   const hasTrackedTargets = hasConfiguredTrackedCompanies(onboardingData);
-  const topics = (radar?.signals || []).slice(0, 10).map((signal, index) => ({
+  const radarTopics = (radar?.signals || []).slice(0, 10).map((signal, index) => ({
     id: signal.id,
     name: signal.title,
     score: signal.importance,
@@ -160,6 +212,33 @@ export default function Home() {
     source: `${signal.company} · ${signal.source}`,
     time: signal.time,
   }));
+
+  const briefTopics =
+    !radar && briefAnalysis?.events
+      ? briefAnalysis.events.slice(0, 10).map((event: any, index: number) => {
+          const src = briefSources?.[index];
+          const impact =
+            event.impact === "high"
+              ? 94
+              : event.impact === "medium"
+                ? 82
+                : event.impact === "low"
+                  ? 75
+                  : 80;
+          return {
+            id: `brief-${index}`,
+            name: event.title,
+            score: impact,
+            type: "Opportunity" as const,
+            rank: index + 1,
+            trend: "up" as const,
+            source: src?.source || "News",
+            time: src ? formatRelativeTime(src.pubDate) : undefined,
+          };
+        })
+      : [];
+
+  const topics = radarTopics.length > 0 ? radarTopics : briefTopics;
 
   const topSignals = (radar?.signals || []).slice(0, 3);
   const insight = {
@@ -263,23 +342,34 @@ export default function Home() {
         )}
       </header>
 
-      {topics.length > 0 && (
-        <section className="mt-2">
-          <div className="px-5 flex justify-between items-center mb-3">
-            <h2 className="text-[11px] font-bold uppercase tracking-widest text-slate-400">
-              Live Signals
-            </h2>
-            {radar?.timestamp && (
-              <span className="text-[10px] text-slate-400">{formatRelativeTime(radar.timestamp)}</span>
-            )}
-          </div>
+      {/* 핫 토픽: 헤더 박스 바로 아래, 인사이트 위. 항상 노출해서 위치를 찾기 쉽게 함 */}
+      <section className="mt-4">
+        <div className="px-5 flex justify-between items-center mb-3">
+          <h2 className="text-sm font-bold text-slate-700">
+            {radar ? "Live Signals" : "핫 토픽"}
+          </h2>
+          {(radar?.timestamp || briefSources?.[0]?.pubDate) && (
+            <span className="text-[10px] text-slate-400">
+              {radar?.timestamp
+                ? formatRelativeTime(radar.timestamp)
+                : briefSources?.[0]?.pubDate
+                ? formatRelativeTime(briefSources[0].pubDate)
+                : null}
+            </span>
+          )}
+        </div>
+        {topics.length > 0 ? (
           <div className="flex overflow-x-auto px-5 gap-3 no-scrollbar pb-2">
-            {topics.map((topic, index) => (
+            {topics.map((topic: TopicData, index: number) => (
               <TopicCard key={topic.id} topic={topic} isActive={index === 0} />
             ))}
           </div>
-        </section>
-      )}
+        ) : !radar && briefError ? (
+          <p className="px-5 py-3 text-xs text-rose-500">핫 토픽 분석 중 오류: {briefError}</p>
+        ) : !radar ? (
+          <p className="px-5 py-3 text-xs text-slate-500">최신 뉴스 기반 핫 토픽 불러오는 중…</p>
+        ) : null}
+      </section>
 
       <main className="px-5 mt-6">
         <InsightSection data={insight} />

@@ -1,0 +1,33 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - generic [ref=e4]: 9:41
+    - generic [ref=e5]:
+      - generic [ref=e6]: signal_cellular_alt
+      - generic [ref=e7]: wifi
+      - generic [ref=e8]: battery_full
+  - banner [ref=e9]:
+    - generic [ref=e11]:
+      - heading "시장 신호" [level=1] [ref=e12]
+      - paragraph [ref=e13]: 공식 사이트를 직접 탐색해 변화만 골라 보여줍니다.
+  - generic [ref=e15]:
+    - paragraph [ref=e16]: 공식 사이트가 아직 없습니다
+    - paragraph [ref=e17]: 설정에서 경쟁사 웹사이트를 넣어야 Playwright 기반 agentic search가 동작합니다.
+    - button "설정 열기" [ref=e18] [cursor=pointer]
+  - main [ref=e19]
+  - navigation [ref=e22]:
+    - link "radar 레이더" [ref=e23] [cursor=pointer]:
+      - /url: /
+      - generic [ref=e24]: radar
+      - generic [ref=e25]: 레이더
+    - link "notifications_active 시장신호" [ref=e26] [cursor=pointer]:
+      - /url: /signals
+      - generic [ref=e27]: notifications_active
+      - generic [ref=e28]: 시장신호
+    - link "folder_special 금고" [ref=e29] [cursor=pointer]:
+      - /url: /vault
+      - generic [ref=e30]: folder_special
+      - generic [ref=e31]: 금고
+    - link "tune 설정" [ref=e32] [cursor=pointer]:
+      - /url: /config
+      - generic [ref=e33]: tune
+      - generic [ref=e34]: 설정

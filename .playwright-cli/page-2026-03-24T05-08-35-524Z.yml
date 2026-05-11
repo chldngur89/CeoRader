@@ -1,0 +1,94 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e4]: 9:41
+      - generic [ref=e5]:
+        - generic [ref=e6]: signal_cellular_alt
+        - generic [ref=e7]: wifi
+        - generic [ref=e8]: battery_full
+    - banner [ref=e9]:
+      - heading "레이더 건강도" [level=1] [ref=e10]
+      - paragraph [ref=e11]: 설정 완성도, 커버리지, 신선도, extractor 품질을 같이 평가합니다.
+    - main [ref=e12]:
+      - generic [ref=e31]:
+        - paragraph [ref=e32]: Radar Health Score
+        - paragraph [ref=e33]: "82"
+        - paragraph [ref=e34]: Usable
+        - paragraph [ref=e35]: 추적 회사 3개 · 활성 소스 18개
+      - generic [ref=e36]:
+        - generic [ref=e37]:
+          - paragraph [ref=e38]: "1"
+          - paragraph [ref=e39]: stale
+        - generic [ref=e40]:
+          - paragraph [ref=e41]: "0"
+          - paragraph [ref=e42]: error source
+        - generic [ref=e43]:
+          - paragraph [ref=e44]: "3"
+          - paragraph [ref=e45]: snapshot gap
+        - generic [ref=e46]:
+          - paragraph [ref=e47]: "0"
+          - paragraph [ref=e48]: low confidence
+      - generic [ref=e49]:
+        - heading "세부 진단" [level=2] [ref=e50]
+        - generic [ref=e51]:
+          - generic [ref=e52]:
+            - generic [ref=e53]:
+              - paragraph [ref=e54]: 전략 입력
+              - generic [ref=e55]: "100"
+            - paragraph [ref=e58]: 회사 설명, 목표, 키워드가 얼마나 채워졌는지 봅니다.
+          - generic [ref=e59]:
+            - generic [ref=e60]:
+              - paragraph [ref=e61]: 대상 설정
+              - generic [ref=e62]: "100"
+            - paragraph [ref=e65]: 추적 대상에 공식 사이트가 충분히 연결되어 있는지 확인합니다.
+          - generic [ref=e66]:
+            - generic [ref=e67]:
+              - paragraph [ref=e68]: 소스 커버리지
+              - generic [ref=e69]: "44"
+            - paragraph [ref=e72]: 활성 소스 중 실제 스냅샷을 가진 비율입니다.
+          - generic [ref=e73]:
+            - generic [ref=e74]:
+              - paragraph [ref=e75]: 스캔 신선도
+              - generic [ref=e76]: "100"
+            - paragraph [ref=e79]: 최근 3일 안에 정상적으로 돈 스캔 비율을 반영합니다.
+          - generic [ref=e80]:
+            - generic [ref=e81]:
+              - paragraph [ref=e82]: 추출 신뢰도
+              - generic [ref=e83]: "65"
+            - paragraph [ref=e86]: 상관 이벤트 confidence 평균으로 현재 extractor 품질을 봅니다.
+      - generic [ref=e87]:
+        - heading "Coverage / Diagnostics" [level=2] [ref=e88]
+        - generic [ref=e89]:
+          - generic [ref=e90]:
+            - paragraph [ref=e91]: 스냅샷 커버리지 부족
+            - paragraph [ref=e92]: CeoRader 등 1개 회사는 스냅샷 커버리지가 절반 이하입니다.
+            - link "소스 점검" [ref=e93] [cursor=pointer]:
+              - /url: /company
+          - generic [ref=e94]:
+            - paragraph [ref=e95]: stale run
+            - paragraph [ref=e96]: CeoRader 등 1개 회사는 최근 3일 안에 유효한 런이 없습니다.
+            - link "런 확인" [ref=e97] [cursor=pointer]:
+              - /url: /poc
+      - generic [ref=e98]:
+        - heading "권장 조치" [level=2] [ref=e99]
+        - generic [ref=e100]:
+          - generic [ref=e101]: "스냅샷 커버리지 부족: CeoRader 등 1개 회사는 스냅샷 커버리지가 절반 이하입니다."
+          - generic [ref=e102]: "stale run: CeoRader 등 1개 회사는 최근 3일 안에 유효한 런이 없습니다."
+    - navigation [ref=e17]:
+      - link "radar 레이더" [ref=e18] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e19]: radar
+        - generic [ref=e20]: 레이더
+      - link "notifications_active 시장신호" [ref=e21] [cursor=pointer]:
+        - /url: /signals
+        - generic [ref=e22]: notifications_active
+        - generic [ref=e23]: 시장신호
+      - link "folder_special 금고" [ref=e24] [cursor=pointer]:
+        - /url: /vault
+        - generic [ref=e25]: folder_special
+        - generic [ref=e26]: 금고
+      - link "tune 설정" [ref=e27] [cursor=pointer]:
+        - /url: /config
+        - generic [ref=e28]: tune
+        - generic [ref=e29]: 설정
+  - alert [ref=e103]

@@ -1,0 +1,28 @@
+- generic [active] [ref=e1]:
+  - alert [ref=e25]
+  - generic [ref=e27]:
+    - generic [ref=e28]:
+      - generic [ref=e29]: 9:41
+      - generic [ref=e30]:
+        - generic [ref=e31]: signal_cellular_alt
+        - generic [ref=e32]: wifi
+        - generic [ref=e33]: battery_full
+    - generic [ref=e35]:
+      - button "arrow_back_ios" [ref=e36] [cursor=pointer]:
+        - generic [ref=e37]: arrow_back_ios
+      - generic [ref=e38]: 2 / 5 단계
+    - generic [ref=e41]:
+      - banner [ref=e91]:
+        - heading "우리 회사를 이해시킵니다" [level=1] [ref=e92]
+        - paragraph [ref=e93]: 회사 설명은 relevance 판단에, 웹사이트는 향후 자체 추적에 사용됩니다.
+      - generic [ref=e94]:
+        - generic [ref=e95]:
+          - generic [ref=e96]: 회사명
+          - 'textbox "예: CeoRader" [ref=e97]'
+        - generic [ref=e98]:
+          - generic [ref=e99]: 회사 웹사이트
+          - 'textbox "예: https://ceorader.ai" [ref=e100]'
+        - generic [ref=e101]:
+          - generic [ref=e102]: 회사 설명
+          - 'textbox "예: 제조·물류 CEO를 위한 경쟁사 추적 및 전략 의사결정 소프트웨어를 제공합니다." [ref=e103]'
+    - button "계속하기" [disabled] [ref=e87]

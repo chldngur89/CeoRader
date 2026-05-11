@@ -50,6 +50,15 @@ type RegistryInput = {
   manualSources?: ManualTrackedSourceInput[];
 };
 
+export interface SourceStateInput {
+  id: string;
+  isActive?: boolean;
+  priority?: number;
+  label?: string;
+  url?: string;
+  tags?: string[];
+}
+
 const ENTITY_DIR = path.join(AGENTIC_ROOT, "entities");
 
 function getRegistryPath(entityId: string) {
@@ -246,4 +255,49 @@ export async function ensureSourceRegistry({
 
   await writeJsonFile(getRegistryPath(entityId), registry);
   return registry;
+}
+
+export async function updateSourceRegistry({
+  company,
+  website,
+  includeDefaults = true,
+  manualSources = [],
+  sourceStates = [],
+}: RegistryInput & {
+  sourceStates?: SourceStateInput[];
+}): Promise<TrackedEntityRegistry> {
+  const registry = await ensureSourceRegistry({
+    company,
+    website,
+    includeDefaults,
+    manualSources,
+  });
+
+  const stateById = new Map(sourceStates.map((item) => [item.id, item]));
+  const nextSources = registry.sources.map((source) => {
+    const override = stateById.get(source.id);
+    if (!override) {
+      return source;
+    }
+
+    const nextUrl = override.url ? normalizeUrl(override.url) : source.url;
+    return {
+      ...source,
+      isActive: typeof override.isActive === "boolean" ? override.isActive : source.isActive,
+      priority: typeof override.priority === "number" ? override.priority : source.priority,
+      label: typeof override.label === "string" && override.label.trim().length > 0 ? override.label.trim() : source.label,
+      url: nextUrl,
+      candidateUrls: nextUrl !== source.url ? dedupeStrings([nextUrl, ...source.candidateUrls]) : source.candidateUrls,
+      tags: override.tags ? dedupeStrings(override.tags) : source.tags,
+    };
+  });
+
+  const nextRegistry: TrackedEntityRegistry = {
+    ...registry,
+    updatedAt: new Date().toISOString(),
+    sources: nextSources.sort((a, b) => b.priority - a.priority),
+  };
+
+  await writeJsonFile(getRegistryPath(nextRegistry.entityId), nextRegistry);
+  return nextRegistry;
 }

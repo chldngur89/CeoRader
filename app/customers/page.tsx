@@ -5,8 +5,13 @@ import { useEffect, useMemo, useState } from "react";
 
 import BottomNav from "@/components/layout/BottomNav";
 import MobileContainer from "@/components/layout/MobileContainer";
-import type { ControlRoomResponse } from "@/lib/app/control-room";
-import { type CachedRadarResponse, type RadarSignal } from "@/lib/app/radar-cache";
+import type { ControlRoomCompanyStatus, ControlRoomResponse } from "@/lib/app/control-room";
+import type { CorrelatedEvent } from "@/lib/app/intelligence";
+import {
+  formatRelativeTime,
+  type CachedRadarResponse,
+  type RadarSignal,
+} from "@/lib/app/radar-cache";
 import { STORAGE_KEYS, normalizeOnboardingData, type OnboardingData } from "@/lib/app/state";
 
 const STATUS_CONFIG = {
@@ -15,10 +20,77 @@ const STATUS_CONFIG = {
   error: "bg-rose-100 text-rose-700",
 } as const;
 
+type CompanyTimelineItem = {
+  id: string;
+  kind: "event" | "signal";
+  title: string;
+  summary: string;
+  importance: number;
+  occurredAt: string;
+  changeTypes: string[];
+  evidenceCount?: number;
+  confidence?: number;
+};
+
+function formatChangeType(changeType: string) {
+  const labels: Record<string, string> = {
+    pricing: "가격",
+    messaging: "메시지",
+    hiring: "채용",
+    partnership: "제휴",
+    product: "제품",
+    initial: "기준선",
+  };
+
+  return labels[changeType] || changeType;
+}
+
+function buildTimeline(
+  company: ControlRoomCompanyStatus,
+  events: CorrelatedEvent[],
+  signals: RadarSignal[]
+) {
+  const signalOccurredAt = company.latestRun?.timestamp || new Date().toISOString();
+  const items: CompanyTimelineItem[] = [
+    ...events.map((event) => ({
+      id: event.id,
+      kind: "event" as const,
+      title: event.title,
+      summary: event.summary,
+      importance: event.importance,
+      occurredAt: event.occurredAt,
+      changeTypes: event.changeTypes,
+      evidenceCount: event.evidenceCount,
+      confidence: event.confidence,
+    })),
+    ...signals.map((signal) => ({
+      id: signal.id,
+      kind: "signal" as const,
+      title: signal.title,
+      summary: signal.recommendation,
+      importance: signal.importance,
+      occurredAt: signalOccurredAt,
+      changeTypes: signal.changeTypes,
+    })),
+  ];
+
+  return items
+    .sort((left, right) => {
+      const timeDiff = new Date(right.occurredAt).getTime() - new Date(left.occurredAt).getTime();
+      if (timeDiff !== 0) {
+        return timeDiff;
+      }
+
+      return right.importance - left.importance;
+    })
+    .slice(0, 4);
+}
+
 export default function WatchlistPage() {
   const [data, setData] = useState<OnboardingData | null>(null);
   const [controlRoom, setControlRoom] = useState<ControlRoomResponse | null>(null);
   const [radarSignals, setRadarSignals] = useState<RadarSignal[]>([]);
+  const [radarEvents, setRadarEvents] = useState<CorrelatedEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -34,6 +106,7 @@ export default function WatchlistPage() {
       try {
         const parsedRadar = JSON.parse(cachedRadar) as CachedRadarResponse;
         setRadarSignals(parsedRadar.signals || []);
+        setRadarEvents(parsedRadar.events || []);
       } catch {
         localStorage.removeItem(STORAGE_KEYS.radarCache);
       }
@@ -79,12 +152,56 @@ export default function WatchlistPage() {
     }, {});
   }, [radarSignals]);
 
+  const eventsByCompany = useMemo(() => {
+    return radarEvents.reduce<Record<string, CorrelatedEvent[]>>((accumulator, event) => {
+      accumulator[event.company] = [...(accumulator[event.company] || []), event].sort(
+        (left, right) => right.importance - left.importance
+      );
+      return accumulator;
+    }, {});
+  }, [radarEvents]);
+
+  const companyCards = useMemo(() => {
+    if (!controlRoom) {
+      return [];
+    }
+
+    return controlRoom.companies
+      .filter((company) => company.company !== data?.companyName)
+      .map((company) => {
+        const companySignals = signalsByCompany[company.company] || [];
+        const companyEvents = eventsByCompany[company.company] || [];
+        const timeline = buildTimeline(company, companyEvents, companySignals);
+        const trendCounts = [...companyEvents.flatMap((event) => event.changeTypes), ...companySignals.flatMap((signal) => signal.changeTypes)]
+          .reduce<Record<string, number>>((accumulator, changeType) => {
+            accumulator[changeType] = (accumulator[changeType] || 0) + 1;
+            return accumulator;
+          }, {});
+        const trends = Object.entries(trendCounts)
+          .sort((left, right) => right[1] - left[1])
+          .slice(0, 3);
+
+        return {
+          company,
+          companySignals,
+          companyEvents,
+          timeline,
+          trends,
+        };
+      })
+      .sort((left, right) => {
+        const leftScore = (left.timeline[0]?.importance || 0) + left.companyEvents.length * 2 + left.companySignals.length;
+        const rightScore = (right.timeline[0]?.importance || 0) + right.companyEvents.length * 2 + right.companySignals.length;
+        return rightScore - leftScore;
+      });
+  }, [controlRoom, data, eventsByCompany, signalsByCompany]);
+
   return (
     <MobileContainer>
       <header className="px-5 py-4">
         <h1 className="text-2xl font-bold text-navy-custom tracking-tight">워치리스트</h1>
         <p className="text-sm text-slate-500 mt-1">
-          추적 대상별로 변화 강도, 커버리지, 최근 신호를 정리합니다.
+          경쟁사별로 연결 이벤트, 신호 추세, 최근 변화 흐름을 한 화면에서 봅니다.
         </p>
       </header>
 
@@ -100,7 +217,7 @@ export default function WatchlistPage() {
           <>
             <section className="grid grid-cols-3 gap-3">
               <StatCard label="대상 회사" value={String(controlRoom?.overview.trackedCompanies || 0)} />
-              <StatCard label="최근 런" value={String(controlRoom?.overview.recentRuns || 0)} />
+              <StatCard label="이벤트" value={String(radarEvents.length)} />
               <StatCard label="총 신호" value={String(radarSignals.length)} />
             </section>
 
@@ -110,79 +227,117 @@ export default function WatchlistPage() {
               <div className="rounded-2xl bg-rose-50 p-4 text-sm text-rose-700">{error}</div>
             ) : (
               <section className="space-y-3">
-                {controlRoom?.companies
-                  .filter((company) => company.company !== data.companyName)
-                  .map((company) => {
-                    const companySignals = signalsByCompany[company.company] || [];
-                    const latestRun = company.latestRun;
-                    const statusKey =
-                      company.stats.errorSources > 0
-                        ? "error"
-                        : company.stats.changedSources > 0
-                          ? "warning"
-                          : "ok";
+                {companyCards.map(({ company, companySignals, companyEvents, timeline, trends }) => {
+                  const latestRun = company.latestRun;
+                  const statusKey =
+                    company.stats.errorSources > 0
+                      ? "error"
+                      : company.stats.changedSources > 0
+                        ? "warning"
+                        : "ok";
 
-                    return (
-                      <div key={company.entityId} className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-                        <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <div className="flex flex-wrap items-center gap-2">
-                              <h2 className="text-base font-bold text-slate-900">{company.company}</h2>
-                              <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${STATUS_CONFIG[statusKey]}`}>
-                                {statusKey === "ok" ? "Stable" : statusKey === "warning" ? "Watch" : "Error"}
-                              </span>
-                            </div>
-                            <p className="mt-1 text-xs text-slate-500">{company.website}</p>
+                  return (
+                    <div key={company.entityId} className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h2 className="text-base font-bold text-slate-900">{company.company}</h2>
+                            <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${STATUS_CONFIG[statusKey]}`}>
+                              {statusKey === "ok" ? "Stable" : statusKey === "warning" ? "Watch" : "Error"}
+                            </span>
                           </div>
-                          <div className="text-right">
-                            <p className="text-xl font-bold text-slate-900">{companySignals.length}</p>
-                            <p className="text-[10px] text-slate-400">signals</p>
-                          </div>
+                          <p className="mt-1 text-xs text-slate-500">{company.website}</p>
                         </div>
-
-                        <div className="mt-4 grid grid-cols-4 gap-2">
-                          <TinyMetric label="변화" value={String(company.stats.changedSources)} />
-                          <TinyMetric label="초기" value={String(company.stats.initialSources)} />
-                          <TinyMetric label="에러" value={String(company.stats.errorSources)} />
-                          <TinyMetric label="소스" value={String(company.stats.activeSources)} />
-                        </div>
-
-                        <div className="mt-4 rounded-xl bg-slate-50 p-3">
-                          <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400">
-                            Latest Run
-                          </p>
-                          <p className="mt-2 text-sm text-slate-700">
-                            {latestRun
-                              ? `${latestRun.summary.visited}개 소스 방문 · 변화 ${latestRun.summary.changed}건 · 에러 ${latestRun.summary.errors}건`
-                              : "아직 실행 이력이 없습니다."}
-                          </p>
-                        </div>
-
-                        <div className="mt-4">
-                          <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400">
-                            Latest Signals
-                          </p>
-                          {companySignals.length > 0 ? (
-                            <div className="mt-2 space-y-2">
-                              {companySignals.slice(0, 3).map((signal) => (
-                                <div key={signal.id} className="rounded-xl bg-slate-50 px-3 py-3">
-                                  <div className="flex items-center justify-between gap-2">
-                                    <p className="text-sm font-semibold text-slate-800">{signal.title}</p>
-                                    <span className="text-xs font-bold text-slate-500">{signal.importance}</span>
-                                  </div>
-                                  <p className="mt-1 text-xs text-slate-500">{signal.recommendation}</p>
-                                </div>
-                              ))}
-                            </div>
-                          ) : (
-                            <p className="mt-2 text-sm text-slate-500">
-                              아직 새로 감지된 변화가 없습니다. 다음 스캔에서 신호가 생기면 여기에 쌓입니다.
-                            </p>
-                          )}
+                        <div className="text-right">
+                          <p className="text-xl font-bold text-slate-900">{companyEvents.length}</p>
+                          <p className="text-[10px] text-slate-400">events</p>
                         </div>
                       </div>
-                    );
-                  })}
+
+                      <div className="mt-4 grid grid-cols-4 gap-2">
+                        <TinyMetric label="변화" value={String(company.stats.changedSources)} />
+                        <TinyMetric label="초기" value={String(company.stats.initialSources)} />
+                        <TinyMetric label="에러" value={String(company.stats.errorSources)} />
+                        <TinyMetric label="신호" value={String(companySignals.length)} />
+                      </div>
+
+                      <div className="mt-4 rounded-xl bg-slate-50 p-3">
+                        <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400">
+                          Latest Run
+                        </p>
+                        <p className="mt-2 text-sm text-slate-700">
+                          {latestRun
+                            ? `${latestRun.summary.visited}개 소스 방문 · 변화 ${latestRun.summary.changed}건 · 에러 ${latestRun.summary.errors}건`
+                            : "아직 실행 이력이 없습니다."}
+                        </p>
+                        {latestRun && (
+                          <p className="mt-2 text-[11px] text-slate-400">
+                            {formatRelativeTime(latestRun.timestamp)} 실행
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="mt-4">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400">
+                            Event Timeline
+                          </p>
+                          {trends.length > 0 && (
+                            <div className="flex flex-wrap justify-end gap-1">
+                              {trends.map(([changeType, count]) => (
+                                <span
+                                  key={`${company.company}-${changeType}`}
+                                  className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-700"
+                                >
+                                  {formatChangeType(changeType)} {count}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        {timeline.length > 0 ? (
+                          <div className="mt-2 space-y-2">
+                            {timeline.map((item) => (
+                              <div key={item.id} className="rounded-xl bg-slate-50 px-3 py-3">
+                                <div className="flex items-center justify-between gap-2">
+                                  <p className="text-sm font-semibold text-slate-800">{item.title}</p>
+                                  <span className="text-xs font-bold text-slate-500">{item.importance}</span>
+                                </div>
+                                <div className="mt-2 flex flex-wrap gap-1">
+                                  <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-slate-500">
+                                    {item.kind === "event" ? "event" : "signal"}
+                                  </span>
+                                  {item.changeTypes.slice(0, 2).map((changeType) => (
+                                    <span
+                                      key={`${item.id}-${changeType}`}
+                                      className="rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-slate-500"
+                                    >
+                                      {formatChangeType(changeType)}
+                                    </span>
+                                  ))}
+                                </div>
+                                <p className="mt-2 text-xs text-slate-500">{item.summary}</p>
+                                <p className="mt-2 text-[11px] text-slate-400">
+                                  {formatRelativeTime(item.occurredAt)}
+                                  {typeof item.evidenceCount === "number"
+                                    ? ` · evidence ${item.evidenceCount}`
+                                    : ""}
+                                  {typeof item.confidence === "number"
+                                    ? ` · confidence ${item.confidence}`
+                                    : ""}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="mt-2 text-sm text-slate-500">
+                            아직 새로 감지된 변화가 없습니다. 다음 스캔에서 이벤트가 생기면 여기에 쌓입니다.
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
               </section>
             )}
 
@@ -190,12 +345,12 @@ export default function WatchlistPage() {
               <PanelCard
                 href="/signals"
                 title="시장 신호"
-                description="신호 원문과 added/removed diff를 바로 확인합니다."
+                description="연결 이벤트 원문과 added/removed diff를 바로 확인합니다."
               />
               <PanelCard
                 href="/poc"
-                title="스캔 로그"
-                description="언제 어떤 런이 돌았는지 실행 이력을 추적합니다."
+                title="런 리뷰"
+                description="개별 실행과 source별 before/after를 검토합니다."
               />
             </section>
           </>

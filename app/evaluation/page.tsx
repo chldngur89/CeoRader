@@ -5,7 +5,8 @@ import { useEffect, useMemo, useState } from "react";
 
 import BottomNav from "@/components/layout/BottomNav";
 import MobileContainer from "@/components/layout/MobileContainer";
-import type { ControlRoomCompanyStatus, ControlRoomResponse } from "@/lib/app/control-room";
+import type { ControlRoomResponse } from "@/lib/app/control-room";
+import type { CachedRadarResponse } from "@/lib/app/radar-cache";
 import { STORAGE_KEYS, normalizeOnboardingData, type OnboardingData } from "@/lib/app/state";
 
 type HealthSection = {
@@ -14,11 +15,23 @@ type HealthSection = {
   description: string;
 };
 
+type DiagnosticItem = {
+  level: "error" | "warning" | "info";
+  title: string;
+  description: string;
+  href: string;
+  cta: string;
+};
+
 function clamp(value: number) {
   return Math.max(0, Math.min(100, Math.round(value)));
 }
 
-function buildSectionScores(data: OnboardingData, controlRoom: ControlRoomResponse | null): HealthSection[] {
+function buildSectionScores(
+  data: OnboardingData,
+  controlRoom: ControlRoomResponse | null,
+  radar: CachedRadarResponse | null
+): HealthSection[] {
   const configuredTargets = data.trackedCompanies.filter(
     (item) => item.name.trim().length > 0 && item.website.trim().length > 0
   );
@@ -42,6 +55,12 @@ function buildSectionScores(data: OnboardingData, controlRoom: ControlRoomRespon
     controlRoom && controlRoom.overview.trackedCompanies > 0
       ? controlRoom.overview.companiesWithErrors / controlRoom.overview.trackedCompanies
       : 0;
+  const extractorConfidence =
+    radar && radar.events.length > 0
+      ? radar.events.reduce((sum, item) => sum + item.confidence, 0) / radar.events.length
+      : controlRoom && controlRoom.overview.activeSources > 0
+        ? 55
+        : 0;
 
   return [
     {
@@ -68,6 +87,11 @@ function buildSectionScores(data: OnboardingData, controlRoom: ControlRoomRespon
       score: clamp(freshRuns * 100 - errorRate * 30),
       description: "최근 3일 안에 정상적으로 돈 스캔 비율을 반영합니다.",
     },
+    {
+      label: "추출 신뢰도",
+      score: clamp(extractorConfidence),
+      description: "상관 이벤트 confidence 평균으로 현재 extractor 품질을 봅니다.",
+    },
   ];
 }
 
@@ -86,55 +110,121 @@ function gradeLabel(score: number) {
   return "Fragile";
 }
 
-function buildIssues(data: OnboardingData, controlRoom: ControlRoomResponse | null) {
-  const issues: string[] = [];
+function buildDiagnostics(
+  data: OnboardingData,
+  controlRoom: ControlRoomResponse | null,
+  radar: CachedRadarResponse | null
+) {
+  const diagnostics: DiagnosticItem[] = [];
 
   if (!data.companyWebsite) {
-    issues.push("우리 회사 공식 사이트가 없어서 자사 메시지 변화도 함께 추적하지 못합니다.");
+    diagnostics.push({
+      level: "warning",
+      title: "자사 사이트가 없습니다",
+      description: "우리 회사 공식 사이트가 없어서 자사 메시지 변화와 포지셔닝 변화는 함께 추적하지 못합니다.",
+      href: "/config",
+      cta: "설정 열기",
+    });
   }
 
-  const incompleteTargets = data.trackedCompanies.filter((item) => !item.website.trim());
+  const incompleteTargets = data.trackedCompanies.filter((item) => item.name.trim() && !item.website.trim());
   if (incompleteTargets.length > 0) {
-    issues.push(`${incompleteTargets.length}개 대상은 공식 사이트 URL이 없어 추적 소스를 만들지 못합니다.`);
-  }
-
-  const errorCompanies = controlRoom?.companies.filter((item) => item.stats.errorSources > 0) || [];
-  if (errorCompanies.length > 0) {
-    issues.push(`${errorCompanies.length}개 회사에서 최근 스캔 에러가 발생했습니다. URL 또는 렌더링 경로를 점검해야 합니다.`);
+    diagnostics.push({
+      level: "error",
+      title: "공식 사이트 누락 대상",
+      description: `${incompleteTargets.length}개 대상은 공식 사이트 URL이 없어 추적 레지스트리를 만들지 못합니다.`,
+      href: "/config",
+      cta: "대상 수정",
+    });
   }
 
   const snapshotPoorCompanies =
     controlRoom?.companies.filter((item) => item.stats.sourcesWithSnapshots < Math.max(1, Math.ceil(item.stats.activeSources / 2))) ||
     [];
   if (snapshotPoorCompanies.length > 0) {
-    issues.push(`${snapshotPoorCompanies.length}개 회사는 스냅샷 커버리지가 절반 이하입니다.`);
+    diagnostics.push({
+      level: "warning",
+      title: "스냅샷 커버리지 부족",
+      description: `${snapshotPoorCompanies
+        .slice(0, 3)
+        .map((item) => item.company)
+        .join(", ")} 등 ${snapshotPoorCompanies.length}개 회사는 스냅샷 커버리지가 절반 이하입니다.`,
+      href: "/company",
+      cta: "소스 점검",
+    });
   }
 
-  return issues;
-}
-
-function buildRecommendations(companies: ControlRoomCompanyStatus[]) {
-  const recommendations: string[] = [];
-
-  for (const company of companies) {
-    if (company.stats.errorSources > 0) {
-      recommendations.push(`${company.company}: 에러가 난 소스 URL부터 정리하세요.`);
-    }
-    if (company.stats.sourcesWithSnapshots === 0) {
-      recommendations.push(`${company.company}: 첫 스캔을 돌려 기준선을 확보하세요.`);
-    }
+  const errorSources =
+    controlRoom?.companies.flatMap((company) =>
+      company.sources
+        .filter((source) => source.lastStatus === "error")
+        .map((source) => `${company.company} · ${source.label}`)
+    ) || [];
+  if (errorSources.length > 0) {
+    diagnostics.push({
+      level: "error",
+      title: "최근 스캔 에러",
+      description: `${errorSources.slice(0, 3).join(", ")} 등 ${errorSources.length}개 소스에서 최근 스캔 에러가 났습니다.`,
+      href: "/poc",
+      cta: "런 리뷰",
+    });
   }
 
-  if (recommendations.length === 0) {
-    recommendations.push("현재 설정은 기본 운용이 가능합니다. 다음은 extractor 정교화와 알림 자동화 단계입니다.");
+  const staleCompanies =
+    controlRoom?.companies.filter((company) => {
+      const timestamp = company.latestRun?.timestamp;
+      return !timestamp || Date.now() - new Date(timestamp).getTime() > 1000 * 60 * 60 * 24 * 3;
+    }) || [];
+  if (staleCompanies.length > 0) {
+    diagnostics.push({
+      level: "warning",
+      title: "stale run",
+      description: `${staleCompanies
+        .slice(0, 3)
+        .map((item) => item.company)
+        .join(", ")} 등 ${staleCompanies.length}개 회사는 최근 3일 안에 유효한 런이 없습니다.`,
+      href: "/poc",
+      cta: "런 확인",
+    });
   }
 
-  return recommendations.slice(0, 4);
+  const lowConfidenceCompanies = Object.entries(
+    (radar?.events || []).reduce<Record<string, { total: number; count: number }>>((accumulator, event) => {
+      const current = accumulator[event.company] || { total: 0, count: 0 };
+      accumulator[event.company] = {
+        total: current.total + event.confidence,
+        count: current.count + 1,
+      };
+      return accumulator;
+    }, {})
+  )
+    .map(([company, value]) => ({
+      company,
+      average: value.total / Math.max(1, value.count),
+      count: value.count,
+    }))
+    .filter((item) => item.average < 65);
+
+  if (lowConfidenceCompanies.length > 0) {
+    diagnostics.push({
+      level: "info",
+      title: "extractor confidence 낮음",
+      description: `${lowConfidenceCompanies
+        .slice(0, 3)
+        .map((item) => `${item.company}(${Math.round(item.average)})`)
+        .join(", ")} 등 ${lowConfidenceCompanies.length}개 회사는 correlation 근거가 더 필요합니다.`,
+      href: "/customers",
+      cta: "타임라인 보기",
+    });
+  }
+
+  return diagnostics;
 }
 
 export default function RadarHealthPage() {
   const [data, setData] = useState<OnboardingData | null>(null);
   const [controlRoom, setControlRoom] = useState<ControlRoomResponse | null>(null);
+  const [radar, setRadar] = useState<CachedRadarResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -147,6 +237,16 @@ export default function RadarHealthPage() {
 
     const parsed = normalizeOnboardingData(JSON.parse(raw));
     setData(parsed);
+
+    const cachedRadar = localStorage.getItem(STORAGE_KEYS.radarCache);
+    if (cachedRadar) {
+      try {
+        setRadar(JSON.parse(cachedRadar) as CachedRadarResponse);
+      } catch {
+        localStorage.removeItem(STORAGE_KEYS.radarCache);
+      }
+    }
+
     void loadControlRoom(parsed);
   }, []);
 
@@ -177,19 +277,40 @@ export default function RadarHealthPage() {
   }
 
   const sections = useMemo(
-    () => (data ? buildSectionScores(data, controlRoom) : []),
-    [controlRoom, data]
+    () => (data ? buildSectionScores(data, controlRoom, radar) : []),
+    [controlRoom, data, radar]
   );
   const score = overallScore(sections);
-  const issues = data ? buildIssues(data, controlRoom) : [];
-  const recommendations = buildRecommendations(controlRoom?.companies || []);
+  const diagnostics = data ? buildDiagnostics(data, controlRoom, radar) : [];
+  const staleCompanies =
+    controlRoom?.companies.filter((company) => {
+      const timestamp = company.latestRun?.timestamp;
+      return !timestamp || Date.now() - new Date(timestamp).getTime() > 1000 * 60 * 60 * 24 * 3;
+    }).length || 0;
+  const errorSources =
+    controlRoom?.companies.reduce(
+      (sum, company) => sum + company.sources.filter((source) => source.lastStatus === "error").length,
+      0
+    ) || 0;
+  const snapshotGapCompanies =
+    controlRoom?.companies.filter((company) => company.stats.sourcesWithSnapshots < company.stats.activeSources).length || 0;
+  const lowConfidenceCompanies = Object.values(
+    (radar?.events || []).reduce<Record<string, { total: number; count: number }>>((accumulator, event) => {
+      const current = accumulator[event.company] || { total: 0, count: 0 };
+      accumulator[event.company] = {
+        total: current.total + event.confidence,
+        count: current.count + 1,
+      };
+      return accumulator;
+    }, {})
+  ).filter((item) => item.count > 0 && item.total / item.count < 65).length;
 
   return (
     <MobileContainer>
       <header className="px-5 py-4">
         <h1 className="text-2xl font-bold text-navy-custom tracking-tight">레이더 건강도</h1>
         <p className="text-sm text-slate-500 mt-1">
-          설정 완성도, 커버리지, 신선도, 에러율을 같이 평가합니다.
+          설정 완성도, 커버리지, 신선도, extractor 품질을 같이 평가합니다.
         </p>
       </header>
 
@@ -224,6 +345,13 @@ export default function RadarHealthPage() {
               </p>
             </section>
 
+            <section className="grid grid-cols-4 gap-3">
+              <MetricCard label="stale" value={String(staleCompanies)} />
+              <MetricCard label="error source" value={String(errorSources)} />
+              <MetricCard label="snapshot gap" value={String(snapshotGapCompanies)} />
+              <MetricCard label="low confidence" value={String(lowConfidenceCompanies)} />
+            </section>
+
             <section className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
               <h2 className="text-sm font-bold text-slate-900">세부 진단</h2>
               <div className="mt-4 space-y-4">
@@ -246,17 +374,33 @@ export default function RadarHealthPage() {
             </section>
 
             <section className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-              <h2 className="text-sm font-bold text-slate-900">지금 부족한 점</h2>
+              <h2 className="text-sm font-bold text-slate-900">Coverage / Diagnostics</h2>
               <div className="mt-4 space-y-2">
-                {issues.length > 0 ? (
-                  issues.map((issue) => (
-                    <div key={issue} className="rounded-xl bg-rose-50 px-3 py-3 text-sm text-rose-700">
-                      {issue}
+                {diagnostics.length > 0 ? (
+                  diagnostics.map((item) => (
+                    <div
+                      key={`${item.title}-${item.href}`}
+                      className={`rounded-xl px-3 py-3 text-sm ${
+                        item.level === "error"
+                          ? "bg-rose-50 text-rose-700"
+                          : item.level === "warning"
+                            ? "bg-amber-50 text-amber-700"
+                            : "bg-slate-50 text-slate-700"
+                      }`}
+                    >
+                      <p className="font-semibold">{item.title}</p>
+                      <p className="mt-1 text-xs leading-5">{item.description}</p>
+                      <Link
+                        href={item.href}
+                        className="mt-3 inline-flex rounded-lg bg-white px-3 py-2 text-[11px] font-semibold text-slate-700"
+                      >
+                        {item.cta}
+                      </Link>
                     </div>
                   ))
                 ) : (
                   <div className="rounded-xl bg-emerald-50 px-3 py-3 text-sm text-emerald-700">
-                    심각한 설정 결손은 없습니다. 이제 extractor와 알림 자동화로 넘어갈 수 있습니다.
+                    심각한 설정 결손은 없습니다. 다음은 extractor 정교화와 correlation 튜닝 단계입니다.
                   </div>
                 )}
               </div>
@@ -265,11 +409,15 @@ export default function RadarHealthPage() {
             <section className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
               <h2 className="text-sm font-bold text-slate-900">권장 조치</h2>
               <div className="mt-4 space-y-2">
-                {recommendations.map((item) => (
-                  <div key={item} className="rounded-xl bg-slate-50 px-3 py-3 text-sm text-slate-700">
-                    {item}
-                  </div>
-                ))}
+                {(diagnostics.length > 0
+                  ? diagnostics.slice(0, 4).map((item) => `${item.title}: ${item.description}`)
+                  : ["현재 기본 운용은 가능하며, 다음 우선순위는 ranking / dedupe와 extractor 튜닝입니다."]).map(
+                  (item) => (
+                    <div key={item} className="rounded-xl bg-slate-50 px-3 py-3 text-sm text-slate-700">
+                      {item}
+                    </div>
+                  )
+                )}
               </div>
             </section>
           </>
@@ -278,5 +426,14 @@ export default function RadarHealthPage() {
 
       <BottomNav />
     </MobileContainer>
+  );
+}
+
+function MetricCard({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl bg-slate-50 p-3 text-center">
+      <p className="text-lg font-bold text-slate-900">{value}</p>
+      <p className="text-[10px] text-slate-500">{label}</p>
+    </div>
   );
 }

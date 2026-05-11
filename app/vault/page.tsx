@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import BottomNav from "@/components/layout/BottomNav";
@@ -209,6 +210,31 @@ export default function VaultPage() {
                 <h3 className="font-bold text-slate-800 mb-1">{item.title}</h3>
                 <p className="text-xs text-slate-500 mb-3 whitespace-pre-wrap">{item.content}</p>
 
+                {item.type === "action" && (
+                  <div className="mb-3 flex flex-wrap gap-2">
+                    {item.actionStatus && (
+                      <span className="px-2 py-0.5 bg-emerald-50 rounded text-[10px] text-emerald-700 font-semibold">
+                        {item.actionStatus}
+                      </span>
+                    )}
+                    {item.owner && (
+                      <span className="px-2 py-0.5 bg-slate-100 rounded text-[10px] text-slate-600 font-semibold">
+                        {item.owner}
+                      </span>
+                    )}
+                    {item.horizon && (
+                      <span className="px-2 py-0.5 bg-slate-100 rounded text-[10px] text-slate-600 font-semibold">
+                        {item.horizon}
+                      </span>
+                    )}
+                    {item.priority && (
+                      <span className="px-2 py-0.5 bg-slate-100 rounded text-[10px] text-slate-600 font-semibold">
+                        {item.priority}
+                      </span>
+                    )}
+                  </div>
+                )}
+
                 <div className="flex flex-wrap gap-1 mb-3">
                   {item.tags.map((tag) => (
                     <span key={tag} className="px-2 py-0.5 bg-slate-100 rounded text-[10px] text-slate-600">
@@ -221,14 +247,21 @@ export default function VaultPage() {
                   <span className="text-[10px] text-slate-400">
                     {new Date(item.savedAt).toLocaleString("ko-KR")}
                   </span>
-                  {item.link ? (
-                    <button
-                      onClick={() => window.open(item.link, "_blank", "noopener,noreferrer")}
-                      className="text-[11px] text-primary font-semibold"
-                    >
-                      원문 열기
-                    </button>
-                  ) : null}
+                  <div className="flex items-center gap-3">
+                    {item.type === "action" && (
+                      <Link href="/finance" className="text-[11px] text-primary font-semibold">
+                        보드 열기
+                      </Link>
+                    )}
+                    {item.link ? (
+                      <button
+                        onClick={() => window.open(item.link, "_blank", "noopener,noreferrer")}
+                        className="text-[11px] text-primary font-semibold"
+                      >
+                        원문 열기
+                      </button>
+                    ) : null}
+                  </div>
                 </div>
               </div>
             );
